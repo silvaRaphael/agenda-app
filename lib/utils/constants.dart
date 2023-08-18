@@ -11,6 +11,8 @@ class AppColors {
 
   static Color grey = const Color(0xFFEDE7E3);
   static Color lightGrey = const Color(0xFFF7F4F3);
+  static Color dark = const Color(0x2B2B2BFF);
+  static Color white = const Color(0xFFFFFFFF);
   static Color success = const Color(0xFF6BF178);
   static Color error = const Color(0xFFFF5964);
 }
@@ -47,6 +49,20 @@ SystemUiOverlayStyle navbarBlack = const SystemUiOverlayStyle(
 
 String randomID() {
   return (Random().nextInt(100) * pi).toString().split('.')[1];
+}
+
+String getCurrentGreeting() {
+  List<String> greetings = [
+    'Bom Dia',
+    'Boa Tarde',
+    'Boa Noite',
+  ];
+
+  int hourNow = DateTime.now().hour.toInt();
+
+  if (hourNow >= 6 && hourNow < 12) return greetings[0];
+  if (hourNow >= 12 && hourNow < 18) return greetings[1];
+  return greetings[2];
 }
 
 void showMySnackBar(BuildContext context, String title, bool status) {

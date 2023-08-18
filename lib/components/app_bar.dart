@@ -10,7 +10,8 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? backTooltip;
   final void Function()? backFunction;
   final PreferredSizeWidget? bottom;
-  const MyAppBar({
+  bool? hidden = false;
+  MyAppBar({
     this.navBar,
     this.title,
     this.defaultButton,
@@ -19,14 +20,14 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backTooltip,
     this.backFunction,
     this.bottom,
+    this.hidden,
     super.key,
   });
 
   @override
-  Size get preferredSize =>
-      Size.fromHeight(kToolbarHeight + (bottom != null ? 20 : 0));
-  // Size.fromHeight(kToolbarHeight * (bottom != null ? 2 : 1));
-  // Size.fromHeight(kToolbarHeight + 20);
+  Size get preferredSize => hidden != null && hidden!
+      ? const Size.fromHeight(0)
+      : Size.fromHeight(kToolbarHeight + (bottom != null ? 20 : 0));
 
   @override
   Widget build(BuildContext context) {

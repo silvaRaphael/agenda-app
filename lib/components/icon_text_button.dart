@@ -6,6 +6,7 @@ class MyIconTextButton extends StatefulWidget {
   final double? width;
   final BorderRadiusGeometry? borderRadius;
   final Color? backgroundColor;
+  final Color? color;
   final Future<void> Function()? asyncOnPressed;
   final void Function()? onPressed;
   final String label;
@@ -15,6 +16,7 @@ class MyIconTextButton extends StatefulWidget {
     this.width,
     this.borderRadius,
     this.backgroundColor,
+    this.color,
     this.asyncOnPressed,
     this.onPressed,
     required this.label,
@@ -74,7 +76,7 @@ class _MyIconTextButtonState extends State<MyIconTextButton> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.width ?? double.maxFinite,
+      width: widget.width,
       height: 50,
       child: ClipRRect(
         borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
@@ -87,34 +89,39 @@ class _MyIconTextButtonState extends State<MyIconTextButton> {
           onPressed:
               _hasError || _isLoading || _isCompleted ? null : _handlePressed,
           child: _isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: widget.color ?? AppColors.white,
                   ),
                 )
               : _hasError
-                  ? const Icon(
+                  ? Icon(
                       Icons.error_outline_rounded,
                       size: 28,
-                      color: Colors.white,
+                      color: widget.color ?? AppColors.white,
                     )
                   : _isCompleted
-                      ? const Icon(
+                      ? Icon(
                           Icons.check_circle_outline_rounded,
                           size: 28,
-                          color: Colors.white,
+                          color: widget.color ?? AppColors.white,
                         )
                       : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(widget.label),
+                            Text(
+                              widget.label,
+                              style: TextStyle(
+                                color: widget.color ?? AppColors.white,
+                              ),
+                            ),
                             const SizedBox(width: 5),
                             Icon(
                               widget.icon,
                               size: 18,
-                              color: Colors.white,
+                              color: widget.color ?? AppColors.white,
                             ),
                           ],
                         ),

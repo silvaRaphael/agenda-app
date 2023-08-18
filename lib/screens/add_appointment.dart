@@ -9,11 +9,13 @@ import 'package:agenda/components/icon_text_button.dart';
 import 'package:agenda/utils/api.dart';
 import 'package:agenda/utils/appointments.dart';
 import 'package:agenda/utils/constants.dart';
+import 'package:flutter/services.dart';
 
 class AddAppointmentScreen extends StatefulWidget {
   final DateTime day;
   final List<DateTime>? days;
   final List<dynamic>? usedMarkers;
+
   const AddAppointmentScreen({
     required this.day,
     this.days,
@@ -85,11 +87,29 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
-        navBar: navbarLight,
-        title: widget.days != null
-            ? '${meses[widget.day.month - 1]} - ${widget.days!.map((day) => day.day.toString().padLeft(2, '0'))}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}'
-            : '${meses[widget.day.month - 1]} - ${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: AppColors.white,
+          statusBarIconBrightness: Brightness.dark,
+          systemNavigationBarColor: AppColors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        foregroundColor: AppColors.primary,
+        centerTitle: false,
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 20),
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                child: const Icon(Icons.keyboard_arrow_left, size: 22),
+              ),
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -101,12 +121,23 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                   kToolbarHeight,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(40),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        widget.days != null
+                            ? '${meses[widget.day.month - 1]}\n${widget.days!.map((day) => day.day.toString().padLeft(2, '0'))}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}'
+                            : '${meses[widget.day.month - 1]}\n${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 32,
+                        ),
+                      ),
+                      const SizedBox(height: 42),
                       MyOutlineInput(
                         controller: _title,
                         keyboardType: TextInputType.text,
@@ -148,25 +179,41 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Marcador',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          MyMarkersList(
+                            markers: markers,
+                            blockedMarkers: widget.usedMarkers,
+                            onTap: _setMarker,
+                            marker: _marker,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   const SizedBox(height: 18),
                   Column(
                     children: [
-                      MyMarkersList(
-                        markers: markers,
-                        blockedMarkers: widget.usedMarkers,
-                        onTap: _setMarker,
-                        marker: _marker,
-                      ),
-                      const SizedBox(height: 18),
                       MyIconTextButton(
                         label: widget.days != null
                             ? 'Adicionar Agendamentos'
                             : 'Adicionar Agendamento',
                         icon: Icons.add,
                         onPressed: _addAppointment,
+                        color: AppColors.primary,
+                        backgroundColor: AppColors.grey,
+                        borderRadius: BorderRadius.circular(100),
                       ),
+                      const SizedBox(height: 18),
                     ],
                   ),
                 ],

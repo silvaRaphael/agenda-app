@@ -1,4 +1,4 @@
-List<String> diasSemana = const [
+List<String> weekDays = const [
   'Domingo',
   'Segunda-Feira',
   'Terça-Feira',

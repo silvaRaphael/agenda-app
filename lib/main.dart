@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:agenda/screens/inicio.dart';
@@ -38,28 +40,21 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Agenda',
       themeMode: ThemeMode.light,
       theme: ThemeData(
-        scaffoldBackgroundColor: AppColors.grey,
-        appBarTheme: AppBarTheme(
-          backgroundColor: AppColors.primary,
-          centerTitle: true,
-          elevation: 2,
-          titleTextStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-          iconTheme: const IconThemeData(
-            // color: Colors.white,
-            color: Colors.white,
-          ),
-          systemOverlayStyle: navbarLight,
-        ),
+        scaffoldBackgroundColor: AppColors.white,
         primaryColor: AppColors.primary,
+        textTheme: GoogleFonts.poppinsTextTheme(textTheme).copyWith(
+          bodyMedium: GoogleFonts.poppins(
+            textStyle: textTheme.bodyMedium,
+            height: 1.125,
+          ),
+        ),
       ),
       home: const InicioScreen(),
     );
