@@ -24,7 +24,7 @@ class MyCalendar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       child: TableCalendar(
-        // locale: 'pt_BR',
+        locale: 'pt_BR',
         focusedDay: focusedDay,
         firstDay: DateTime(2000),
         lastDay: DateTime(2100),
@@ -33,7 +33,7 @@ class MyCalendar extends StatelessWidget {
         availableGestures: AvailableGestures.horizontalSwipe,
         headerStyle: HeaderStyle(
           titleTextFormatter: (date, locale) =>
-              '${meses[date.month - 1]} ${date.year}',
+              '${months[date.month - 1]} ${date.year}',
           titleTextStyle: const TextStyle(fontWeight: FontWeight.w500),
           formatButtonVisible: false,
           titleCentered: true,

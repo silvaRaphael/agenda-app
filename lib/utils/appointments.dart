@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-List<String> meses = [
+List<String> months = [
   'Janeiro',
   'Fevereiro',
   'Março',

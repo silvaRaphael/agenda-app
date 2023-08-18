@@ -1,3 +1,5 @@
+import 'package:agenda/screens/tabs/calendar.dart';
+import 'package:agenda/screens/tabs/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -25,7 +27,6 @@ class InicioScreen extends StatefulWidget {
 
 class _InicioScreenState extends State<InicioScreen>
     with TickerProviderStateMixin {
-  late TabController _tabController;
   bool addAppointmentButtonVisible = false;
   bool multiSelectDays = false;
   int _tabIndex = 0;
@@ -45,12 +46,6 @@ class _InicioScreenState extends State<InicioScreen>
 
   Map<DateTime, List> _appointments = {};
   List _dayAppointments = [];
-
-  void _onTabChanged() {
-    setState(() {
-      addAppointmentButtonVisible = _tabController.index == 1;
-    });
-  }
 
   void _getAppointments() {
     Map<DateTime, List> appointments = AppointmentsRepository(null).getAll();
@@ -118,7 +113,7 @@ class _InicioScreenState extends State<InicioScreen>
         day != null ? DateTime.parse('${day.toString()}Z') : _selectedDay!));
   }
 
-  List _getAppointmentsForDay(DateTime day) {
+  List<dynamic> _getAppointmentsForDay(DateTime day) {
     final formattedDay = DateTime(day.year, day.month, day.day);
 
     final appointmentsForDay = _appointments[formattedDay];
@@ -130,14 +125,6 @@ class _InicioScreenState extends State<InicioScreen>
   void initState() {
     super.initState();
 
-    _tabController = TabController(
-      initialIndex: 0,
-      length: 2,
-      vsync: this,
-    );
-
-    _tabController.addListener(_onTabChanged);
-
     initAppointments(_focusedDay);
 
     remainingWeeks = ((lastDayOfMonth.difference(DateTime.now()).inDays +
@@ -146,13 +133,6 @@ class _InicioScreenState extends State<InicioScreen>
         .ceil();
 
     monthWeeks = List.generate(remainingWeeks, (index) => [index, index == 0]);
-  }
-
-  @override
-  void dispose() {
-    _tabController.removeListener(_onTabChanged);
-    _tabController.dispose();
-    super.dispose();
   }
 
   @override
@@ -229,7 +209,7 @@ class _InicioScreenState extends State<InicioScreen>
         children: [
           Positioned.fill(
             child: [
-              MyTab(
+              /* MyTab(
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,6 +336,15 @@ class _InicioScreenState extends State<InicioScreen>
                     ],
                   ),
                 ],
+              ), */
+              HomeTab(
+                openEditScreen: _openEditScreen,
+                getAppointmentsForDay: _getAppointmentsForDay,
+                appointments: _appointments,
+              ),
+              CalendarTab(
+                openEditScreen: _openEditScreen,
+                getAppointmentsForDay: _getAppointmentsForDay,
               ),
               MyTab(
                 children: [
@@ -418,7 +407,7 @@ class _InicioScreenState extends State<InicioScreen>
                       },
                       headerStyle: HeaderStyle(
                         titleTextFormatter: (date, locale) =>
-                            '${meses[date.month - 1]} ${date.year}',
+                            '${months[date.month - 1]} ${date.year}',
                         titleTextStyle: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w800,
@@ -546,77 +535,33 @@ class _InicioScreenState extends State<InicioScreen>
                       : Column(
                           children: [
                             Text(
-                              'Agendamentos do Dia ${_selectedDay?.day}',
+                              'Agenda do dia ${_selectedDay!.day}',
                               style: TextStyle(
                                 color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(height: 18),
-                            Column(
-                              children: _dayAppointments.map((appointment) {
-                                Map<String, dynamic> appointmentMap =
-                                    appointment as Map<String, dynamic>;
-
-                                List<String> multWordTItle =
-                                    appointmentMap['title'].split(' ');
-                                String abbrTitle =
-                                    appointmentMap['title'].length >= 2
-                                        ? appointmentMap['title']
-                                            .substring(0, 2)
-                                            .toUpperCase()
-                                        : appointmentMap['title'].toUpperCase();
-
-                                if (multWordTItle.length > 1) {
-                                  abbrTitle =
-                                      '${multWordTItle.first[0]}${multWordTItle.last[0]}'
-                                          .toUpperCase();
-                                }
-
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 30,
-                                    vertical: 4,
-                                  ),
-                                  child: InkWell(
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: _dayAppointments.length,
+                                itemBuilder: (context, index) {
+                                  Map<String, dynamic> appointmentMap =
+                                      _dayAppointments[index]
+                                          as Map<String, dynamic>;
+                                  return AppointmentsListTile(
+                                    appointment: _dayAppointments[index],
+                                    date: _selectedDay!,
                                     onTap: () =>
                                         _openEditScreen(appointmentMap, null),
-                                    borderRadius: BorderRadius.circular(100),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          maxRadius: 20,
-                                          backgroundColor: appointmentMap[
-                                                          'marker']
-                                                      .runtimeType ==
-                                                  int
-                                              ? markers[appointmentMap[
-                                                  'marker']] // Cor do marcador
-                                              : AppColors.primary,
-                                          child: Text(
-                                            abbrTitle,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: AppColors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 18),
-                                        Text(
-                                          appointmentMap['title'],
-                                          style: TextStyle(
-                                            color: AppColors.primary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
+                                  );
+                                },
+                              ),
                             ),
-                            const SizedBox(height: 80),
                           ],
                         ),
                 ],
@@ -652,17 +597,17 @@ class _InicioScreenState extends State<InicioScreen>
                       ModelNavBarItem(
                         index: 0,
                         icon: Icons.home_outlined,
-                        iconActive: Icons.home,
+                        iconActive: Icons.home_rounded,
                       ),
                       ModelNavBarItem(
                         index: 1,
-                        icon: Icons.event_note_outlined,
-                        iconActive: Icons.event_note,
+                        icon: Icons.event_outlined,
+                        iconActive: Icons.event_rounded,
                       ),
                       ModelNavBarItem(
                         index: 2,
-                        icon: Icons.attach_money,
-                        iconActive: Icons.attach_money_outlined,
+                        icon: Icons.attach_money_outlined,
+                        iconActive: Icons.attach_money_rounded,
                       ),
                     ].map((item) {
                       return GestureDetector(

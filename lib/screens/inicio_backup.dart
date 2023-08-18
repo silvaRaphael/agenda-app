@@ -426,7 +426,7 @@ class _InicioScreenState extends State<InicioScreen>
                   },
                   headerStyle: HeaderStyle(
                     titleTextFormatter: (date, locale) =>
-                        '${meses[date.month - 1]} ${date.year}',
+                        '${months[date.month - 1]} ${date.year}',
                     titleTextStyle: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,

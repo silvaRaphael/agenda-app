@@ -142,8 +142,8 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     children: [
                       Text(
                         widget.days != null
-                            ? '${meses[widget.day.month - 1]}\n${widget.days!.map((day) => day.day.toString().padLeft(2, '0'))}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}'
-                            : '${meses[widget.day.month - 1]}\n${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+                            ? '${months[widget.day.month - 1]}\n${widget.days!.map((day) => day.day.toString().padLeft(2, '0'))}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}'
+                            : '${months[widget.day.month - 1]}\n${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 32,

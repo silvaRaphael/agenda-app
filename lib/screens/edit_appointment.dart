@@ -141,7 +141,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
       // appBar: MyAppBar(
       //   navBar: navbarLight,
       //   title:
-      //       '${meses[widget.day.month - 1]} - ${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+      //       '${months[widget.day.month - 1]} - ${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
       // ),
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle(
@@ -198,7 +198,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${meses[widget.day.month - 1]}\n${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+                        '${months[widget.day.month - 1]}\n${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 32,
