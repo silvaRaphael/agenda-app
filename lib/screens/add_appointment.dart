@@ -97,15 +97,28 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
         centerTitle: false,
         backgroundColor: AppColors.white,
         elevation: 0,
+        leadingWidth: 200,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 20),
+          padding: const EdgeInsets.only(left: 10),
           child: GestureDetector(
             onTap: () => Navigator.of(context).pop(),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                child: const Icon(Icons.keyboard_arrow_left, size: 22),
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    child: const Icon(Icons.keyboard_arrow_left, size: 22),
+                  ),
+                ),
+                const Text(
+                  'Voltar',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -208,7 +221,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                             : 'Adicionar Agendamento',
                         icon: Icons.add,
                         onPressed: _addAppointment,
-                        color: AppColors.primary,
+                        color: Colors.black.withOpacity(.85),
                         backgroundColor: AppColors.grey,
                         borderRadius: BorderRadius.circular(100),
                       ),

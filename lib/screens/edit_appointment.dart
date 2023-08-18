@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import 'package:agenda/components/markers_list.dart';
 import 'package:agenda/components/icon_button.dart';
 import 'package:agenda/components/inline_radio.dart';
 import 'package:agenda/components/outline_input.dart';
-import 'package:agenda/components/app_bar.dart';
 import 'package:agenda/components/icon_text_button.dart';
 
 import 'package:agenda/utils/api.dart';
@@ -16,6 +16,7 @@ class EditAppointmentScreen extends StatefulWidget {
   final DateTime day;
   final Map<String, dynamic> appointment;
   final List<dynamic>? usedMarkers;
+
   const EditAppointmentScreen({
     required this.day,
     required this.appointment,
@@ -96,21 +97,18 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 32),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                MyIconButton(
-                  iconData: Icons.close,
-                  backgroundColor: AppColors.primary.withOpacity(.5),
-                  onTap: () => Navigator.of(context).pop(),
-                ),
                 MyIconTextButton(
                   label: 'Excluir Agendamento',
                   icon: CupertinoIcons.trash,
                   backgroundColor: AppColors.error,
                   onPressed: _deleteAppointment,
-                  width: MediaQuery.of(context).size.width - 60 - 80,
+                  // color: Colors.black.withOpacity(.85),
+                  // backgroundColor: AppColors.grey,
+                  borderRadius: BorderRadius.circular(100),
                 ),
               ],
             ),
@@ -140,10 +138,47 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
-        navBar: navbarLight,
-        title:
-            '${meses[widget.day.month - 1]} - ${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+      // appBar: MyAppBar(
+      //   navBar: navbarLight,
+      //   title:
+      //       '${meses[widget.day.month - 1]} - ${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+      // ),
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: AppColors.white,
+          statusBarIconBrightness: Brightness.dark,
+          systemNavigationBarColor: AppColors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        foregroundColor: AppColors.primary,
+        centerTitle: false,
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        leadingWidth: 200,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    child: const Icon(Icons.keyboard_arrow_left, size: 22),
+                  ),
+                ),
+                const Text(
+                  'Voltar',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -155,12 +190,21 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                   kToolbarHeight,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(40),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        '${meses[widget.day.month - 1]}\n${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 32,
+                        ),
+                      ),
+                      const SizedBox(height: 42),
                       MyOutlineInput(
                         controller: _title,
                         keyboardType: TextInputType.text,
@@ -200,6 +244,25 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Marcador',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              MyMarkersList(
+                                markers: markers,
+                                blockedMarkers: widget.usedMarkers,
+                                onTap: _setMarker,
+                                marker: _marker,
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ],
@@ -207,34 +270,27 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                   const SizedBox(height: 18),
                   Column(
                     children: [
-                      MyMarkersList(
-                        markers: markers,
-                        blockedMarkers: widget.usedMarkers == null
-                            ? null
-                            : widget.usedMarkers!
-                                .where((marker) =>
-                                    marker != widget.appointment['marker'])
-                                .toList(),
-                        marker: _marker,
-                        onTap: _setMarker,
-                      ),
-                      const SizedBox(height: 18),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           MyIconButton(
                             iconData: CupertinoIcons.trash,
                             backgroundColor: AppColors.error,
                             onTap: _showConfirmDeleteAppointment,
+                            borderRadius: BorderRadius.circular(100),
                           ),
+                          const SizedBox(width: 18),
                           MyIconTextButton(
                             label: 'Editar Agendamento',
                             icon: Icons.edit,
                             onPressed: _editAppointment,
-                            width: MediaQuery.of(context).size.width - 60 - 80,
+                            color: Colors.black.withOpacity(.85),
+                            backgroundColor: AppColors.grey,
+                            borderRadius: BorderRadius.circular(100),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 18),
                     ],
                   ),
                 ],

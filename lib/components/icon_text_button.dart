@@ -77,14 +77,15 @@ class _MyIconTextButtonState extends State<MyIconTextButton> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: widget.width,
-      height: 50,
+      height: 55,
       child: ClipRRect(
         borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
         child: ElevatedButton(
           style: ButtonStyle(
             backgroundColor: MaterialStatePropertyAll(
-                widget.backgroundColor ?? AppColors.primary),
-            elevation: const MaterialStatePropertyAll(2),
+              widget.backgroundColor ?? AppColors.primary,
+            ),
+            elevation: const MaterialStatePropertyAll(8),
           ),
           onPressed:
               _hasError || _isLoading || _isCompleted ? null : _handlePressed,
@@ -115,12 +116,14 @@ class _MyIconTextButtonState extends State<MyIconTextButton> {
                               widget.label,
                               style: TextStyle(
                                 color: widget.color ?? AppColors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(width: 5),
                             Icon(
                               widget.icon,
-                              size: 18,
+                              size: 24,
                               color: widget.color ?? AppColors.white,
                             ),
                           ],
