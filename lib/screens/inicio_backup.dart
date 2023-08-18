@@ -519,7 +519,7 @@ class _InicioScreenState extends State<InicioScreen>
                     },
                     // default builders
                     dowBuilder: (context, day) => Text(
-                      semana[day.weekday - 1],
+                      weekDays[day.weekday - 1].substring(0, 3),
                       style: TextStyle(
                         color: [6, 7].contains(day.weekday)
                             ? AppColors.error

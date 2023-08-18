@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:agenda/components/markers_list.dart';
 import 'package:agenda/components/inline_radio.dart';
 import 'package:agenda/components/outline_input.dart';
-import 'package:agenda/components/app_bar.dart';
 import 'package:agenda/components/icon_text_button.dart';
 
 import 'package:agenda/utils/api.dart';

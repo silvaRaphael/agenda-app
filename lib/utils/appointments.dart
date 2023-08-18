@@ -15,13 +15,11 @@ List<String> meses = [
   'Dezembro',
 ];
 
-List<String> semana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-
 List<MaterialColor> markers = [
   Colors.pink,
   Colors.red,
   Colors.orange,
-  Colors.yellow,
+  Colors.amber,
   Colors.green,
   Colors.blue,
   Colors.indigo,

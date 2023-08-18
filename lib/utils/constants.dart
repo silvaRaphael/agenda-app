@@ -9,7 +9,7 @@ class AppColors {
   static Color secondary = const Color(0xFF1D407D);
   static Color tertiary = const Color(0xFF345FA9);
 
-  static Color grey = const Color(0xFFEDE7E3);
+  static Color grey = const Color(0xFFE3ECED);
   static Color lightGrey = const Color(0xFFF7F4F3);
   static Color dark = const Color(0x2B2B2BFF);
   static Color white = const Color(0xFFFFFFFF);

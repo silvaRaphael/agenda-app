@@ -1,5 +1,3 @@
-import 'package:agenda/components/appointments_list_tile.dart';
-import 'package:agenda/utils/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -9,12 +7,14 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:agenda/screens/add_appointment.dart';
 import 'package:agenda/screens/edit_appointment.dart';
 
-import 'package:agenda/components/app_bar.dart';
+import 'package:agenda/components/appointments_list_tile.dart';
+import 'package:agenda/components/my_tab.dart';
 
-import 'package:agenda/utils/appointments.dart';
-import 'package:agenda/utils/constants.dart';
 import 'package:agenda/utils/api.dart';
+import 'package:agenda/utils/appointments.dart';
 import 'package:agenda/utils/week_days.dart';
+import 'package:agenda/utils/models.dart';
+import 'package:agenda/utils/constants.dart';
 
 class InicioScreen extends StatefulWidget {
   const InicioScreen({super.key});
@@ -29,7 +29,7 @@ class _InicioScreenState extends State<InicioScreen>
   bool addAppointmentButtonVisible = false;
   bool multiSelectDays = false;
   int _tabIndex = 0;
-  List<Widget> _tabs = [];
+  // final List<Widget> _tabs = [];
 
   DateTime firstDayOfWeek = DateTime(DateTime.now().year, DateTime.now().month,
       DateTime.now().day - DateTime.now().weekday % 7);
@@ -41,7 +41,7 @@ class _InicioScreenState extends State<InicioScreen>
   final List<DateTime> _multiSelectedDays = [];
 
   late int remainingWeeks;
-  List<List> monthWeeksAccordion = [];
+  List<List> monthWeeks = [];
 
   Map<DateTime, List> _appointments = {};
   List _dayAppointments = [];
@@ -145,8 +145,7 @@ class _InicioScreenState extends State<InicioScreen>
             7)
         .ceil();
 
-    monthWeeksAccordion =
-        List.generate(remainingWeeks, (index) => [index, index == 0]);
+    monthWeeks = List.generate(remainingWeeks, (index) => [index, index == 0]);
   }
 
   @override
@@ -239,7 +238,7 @@ class _InicioScreenState extends State<InicioScreen>
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
-                          'Aqui estão seus agendamentos do Mês',
+                          'Aqui está a sua agenda do mês',
                           style: TextStyle(
                             color: AppColors.primary,
                             fontSize: 32,
@@ -248,22 +247,24 @@ class _InicioScreenState extends State<InicioScreen>
                           textAlign: TextAlign.start,
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 26),
                       ListView.builder(
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        itemCount: monthWeeksAccordion.length,
+                        itemCount: monthWeeks.length,
                         itemBuilder: (context, index) {
                           DateTime week =
                               firstDayOfWeek.add(Duration(days: index * 7));
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            margin: const EdgeInsets.only(bottom: 18, top: 12),
+                            margin: const EdgeInsets.only(bottom: 24),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 18),
+                                  padding: const EdgeInsets.only(
+                                    bottom: 14,
+                                  ),
                                   child: Text(
                                     'Dia ${week.day} a Dia ${week.add(const Duration(days: 6)).day}',
                                     style: TextStyle(
@@ -298,35 +299,19 @@ class _InicioScreenState extends State<InicioScreen>
                                           child: Text(
                                             '${weekDay.day}\n${weekDays[index].substring(0, 3)}',
                                             style: TextStyle(
-                                              color: AppColors.primary,
+                                              color: AppColors.primary
+                                                  .withOpacity(.5),
                                               fontSize: 12,
                                               fontWeight: FontWeight.w800,
                                             ),
                                             textAlign: TextAlign.end,
                                           ),
                                         ),
-                                        // Text(
-                                        //   weekDays[index].substring(0, 3),
-                                        //   style: TextStyle(
-                                        //     color: AppColors.primary,
-                                        //     fontWeight: FontWeight.bold,
-                                        //   ),
-                                        // ),
-                                        // weekDay.day == DateTime.now().day
-                                        //     ? const Text(
-                                        //         ' (Hoje)',
-                                        //         style: TextStyle(
-                                        //           color: Colors.green,
-                                        //           fontWeight:
-                                        //               FontWeight.bold,
-                                        //         ),
-                                        //       )
-                                        //     : Container(),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Container(
                                             padding: const EdgeInsets.only(
-                                              left: 12,
+                                              left: 16,
                                             ),
                                             decoration: BoxDecoration(
                                               border: Border(
@@ -336,15 +321,26 @@ class _InicioScreenState extends State<InicioScreen>
                                                 ),
                                               ),
                                             ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: weekDayAppointments
-                                                  .map((appointment) {
+                                            child: ListView.builder(
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
+                                              shrinkWrap: true,
+                                              itemCount:
+                                                  weekDayAppointments.length,
+                                              itemBuilder: (context, index) {
+                                                Map<String, dynamic>
+                                                    appointmentMap =
+                                                    weekDayAppointments[index]
+                                                        as Map<String, dynamic>;
                                                 return AppointmentsListTile(
-                                                  appointment: appointment,
+                                                  appointment:
+                                                      weekDayAppointments[
+                                                          index],
+                                                  date: weekDay,
+                                                  onTap: () => _openEditScreen(
+                                                      appointmentMap, weekDay),
                                                 );
-                                              }).toList(),
+                                              },
                                             ),
                                           ),
                                         ),
@@ -357,187 +353,6 @@ class _InicioScreenState extends State<InicioScreen>
                           );
                         },
                       ),
-                      /* ExpansionPanelList(
-                        elevation: 0,
-                        expansionCallback: (int index, bool isExpanded) {
-                          setState(() {
-                            for (var element in monthWeeksAccordion) {
-                              element[1] = false;
-                            }
-                            monthWeeksAccordion[index][1] = !isExpanded;
-                          });
-                        },
-                        expandedHeaderPadding: const EdgeInsets.all(0),
-                        animationDuration: const Duration(milliseconds: 500),
-                        children: monthWeeksAccordion
-                            .map<ExpansionPanel>((monthWeek) {
-                          return ExpansionPanel(
-                            canTapOnHeader: true,
-                            backgroundColor: Colors.transparent,
-                            headerBuilder:
-                                (BuildContext context, bool isExpanded) {
-                              DateTime week = firstDayOfWeek
-                                  .add(Duration(days: monthWeek[0] * 7));
-                              return Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 54),
-                                  child: Text(
-                                    'Dia ${week.day} a Dia ${week.add(const Duration(days: 6)).day}',
-                                    style: TextStyle(
-                                      color: AppColors.primary,
-                                      fontSize: 16,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              );
-                            },
-                            body: Builder(
-                              builder: (context) {
-                                DateTime week = firstDayOfWeek
-                                    .add(Duration(days: monthWeek[0] * 7));
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: 7,
-                                  itemBuilder: (context, index) {
-                                    DateTime weekDay =
-                                        week.add(Duration(days: index));
-
-                                    List weekDayAppointments =
-                                        _getAppointmentsForDay(weekDay);
-
-                                    if (weekDayAppointments.isEmpty) {
-                                      return Container();
-                                    }
-
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 30, vertical: 8),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                'Dia ${weekDay.day} | ',
-                                                style: TextStyle(
-                                                  color: AppColors.primary,
-                                                  fontSize: 20,
-                                                ),
-                                              ),
-                                              Text(
-                                                weekDays[index],
-                                                style: TextStyle(
-                                                  color: AppColors.primary,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              weekDay.day == DateTime.now().day
-                                                  ? const Text(
-                                                      ' (Hoje)',
-                                                      style: TextStyle(
-                                                        color: Colors.green,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    )
-                                                  : Container(),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Column(
-                                            children: weekDayAppointments
-                                                .map((appointment) {
-                                              Map<String, dynamic>
-                                                  appointmentMap = appointment
-                                                      as Map<String, dynamic>;
-
-                                              List<String> multWordTItle =
-                                                  appointmentMap['title']
-                                                      .split(' ');
-                                              String abbrTitle =
-                                                  appointmentMap['title']
-                                                              .length >=
-                                                          2
-                                                      ? appointmentMap['title']
-                                                          .substring(0, 2)
-                                                          .toUpperCase()
-                                                      : appointmentMap['title']
-                                                          .toUpperCase();
-
-                                              if (multWordTItle.length > 1) {
-                                                abbrTitle =
-                                                    '${multWordTItle.first[0]}${multWordTItle.last[0]}'
-                                                        .toUpperCase();
-                                              }
-
-                                              return Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 4),
-                                                child: InkWell(
-                                                  onTap: () => _openEditScreen(
-                                                      appointmentMap, weekDay),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  child: Row(
-                                                    children: [
-                                                      CircleAvatar(
-                                                        maxRadius: 20,
-                                                        backgroundColor: appointmentMap[
-                                                                        'marker']
-                                                                    .runtimeType ==
-                                                                int
-                                                            ? markers[
-                                                                appointmentMap[
-                                                                    'marker']] // Cor do marcador
-                                                            : AppColors.primary,
-                                                        child: Text(
-                                                          abbrTitle,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 14,
-                                                            color: AppColors.white,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 18),
-                                                      Text(
-                                                        appointmentMap['title'],
-                                                        style: TextStyle(
-                                                          color:
-                                                              AppColors.primary,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            }).toList(),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                            isExpanded: monthWeek[1],
-                          );
-                        }).toList(),
-                      ), */
-                      const SizedBox(height: 18),
                     ],
                   ),
                 ],
@@ -606,7 +421,7 @@ class _InicioScreenState extends State<InicioScreen>
                             '${meses[date.month - 1]} ${date.year}',
                         titleTextStyle: TextStyle(
                           color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                         ),
                         formatButtonVisible: false,
                         titleCentered: true,
@@ -616,24 +431,24 @@ class _InicioScreenState extends State<InicioScreen>
                         leftChevronIcon: Container(
                           padding: const EdgeInsets.all(3),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
+                            color: AppColors.grey,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
                             Icons.chevron_left,
-                            color: AppColors.white,
+                            color: AppColors.primary,
                             size: 32,
                           ),
                         ),
                         rightChevronIcon: Container(
                           padding: const EdgeInsets.all(3),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
+                            color: AppColors.grey,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
                             Icons.chevron_right,
-                            color: AppColors.white,
+                            color: AppColors.primary,
                             size: 32,
                           ),
                         ),
@@ -646,13 +461,13 @@ class _InicioScreenState extends State<InicioScreen>
                         selectedBuilder: (context, day, focusedDay) =>
                             MyCalendarDay(
                           day: day,
-                          backgroundColor: AppColors.tertiary,
+                          backgroundColor: Colors.indigo,
                           color: AppColors.white,
                         ),
                         todayBuilder: (context, day, focusedDay) =>
                             MyCalendarDay(
                           day: day,
-                          backgroundColor: AppColors.accent,
+                          backgroundColor: Colors.blue[700],
                           color: AppColors.white,
                         ),
                         markerBuilder: (context, day, appointments) {
@@ -699,20 +514,22 @@ class _InicioScreenState extends State<InicioScreen>
                         },
                         // default builders
                         dowBuilder: (context, day) => Text(
-                          semana[day.weekday - 1],
+                          weekDays[day.weekday - 1].substring(0, 3),
                           style: TextStyle(
                             color: [6, 7].contains(day.weekday)
                                 ? AppColors.error
                                 : AppColors.primary,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                         defaultBuilder: (context, day, focusedDay) =>
                             MyCalendarDay(
                           day: day,
                           backgroundColor: multiSelectDays &&
                                   _multiSelectedDays.contains(day)
-                              ? Colors.green
+                              ? Colors.greenAccent[700]
                               : null,
                           color: multiSelectDays &&
                                   _multiSelectedDays.contains(day)
@@ -804,8 +621,12 @@ class _InicioScreenState extends State<InicioScreen>
                         ),
                 ],
               ),
-              MyTab(
-                children: [],
+              const MyTab(
+                children: [
+                  Center(
+                    child: Text('Cobranças'),
+                  ),
+                ],
               ),
             ][_tabIndex],
           ),
@@ -914,30 +735,6 @@ class _InicioScreenState extends State<InicioScreen>
   }
 }
 
-class MyTab extends StatelessWidget {
-  final List<Widget> children;
-  const MyTab({
-    required this.children,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: MediaQuery.of(context).size.width,
-            minHeight: MediaQuery.of(context).size.height,
-          ),
-          child: Column(children: children),
-        ),
-      ),
-    );
-  }
-}
-
 class MyCalendarDay extends StatelessWidget {
   final DateTime day;
   final Color? backgroundColor;
@@ -964,8 +761,8 @@ class MyCalendarDay extends StatelessWidget {
             child: Text(
               day.day.toString(),
               style: TextStyle(
-                color: color ?? AppColors.primary,
-                fontWeight: FontWeight.w500,
+                color: color ?? AppColors.primary.withOpacity(.75),
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
