@@ -1,54 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// ignore: must_be_immutable
-class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final SystemUiOverlayStyle? navBar;
-  final String? title;
-  final bool? defaultButton;
-  final bool? backButton;
-  final IconData? backIcon;
-  final String? backTooltip;
-  final void Function()? backFunction;
-  final PreferredSizeWidget? bottom;
-  bool? hidden = false;
-  MyAppBar({
-    this.navBar,
-    this.title,
-    this.defaultButton,
-    this.backButton,
-    this.backIcon,
-    this.backTooltip,
-    this.backFunction,
-    this.bottom,
-    this.hidden,
-    super.key,
-  });
+import 'package:agenda/utils/constants.dart';
+
+class GoBackAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final DateTime? day;
+
+  const GoBackAppBar({this.day, super.key});
 
   @override
-  Size get preferredSize => hidden != null && hidden!
-      ? const Size.fromHeight(0)
-      : Size.fromHeight(kToolbarHeight + (bottom != null ? 20 : 0));
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: AppColors.white,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      foregroundColor: AppColors.primary,
+      centerTitle: false,
+      backgroundColor: AppColors.white,
       elevation: 0,
-      systemOverlayStyle: navBar,
-      title: title == null ? null : Text(title!),
-      leading: defaultButton != null && defaultButton!
-          ? null
-          : backButton != null && !backButton!
-              ? Container()
-              : IconButton(
-                  icon: Icon(backIcon ?? Icons.arrow_back),
-                  onPressed: backFunction ??
-                      () {
-                        Navigator.pop(context);
-                      },
-                  tooltip: backTooltip ?? 'Voltar',
+      leadingWidth: 100,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).pop(day),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  child: const Icon(Icons.keyboard_arrow_left, size: 22),
                 ),
-      bottom: bottom,
+              ),
+              const Text(
+                'Voltar',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

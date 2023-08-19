@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 
+import 'package:agenda/components/app_bar.dart';
 import 'package:agenda/components/markers_list.dart';
 import 'package:agenda/components/icon_button.dart';
 import 'package:agenda/components/inline_radio.dart';
@@ -69,7 +69,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
       'marker': _marker,
     }, id: widget.appointment['id']);
 
-    Navigator.pop(context);
+    Navigator.of(context).pop();
   }
 
   void _showConfirmDeleteAppointment() {
@@ -106,8 +106,6 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                   icon: CupertinoIcons.trash,
                   backgroundColor: AppColors.error,
                   onPressed: _deleteAppointment,
-                  // color: Colors.black.withOpacity(.85),
-                  // backgroundColor: AppColors.grey,
                   borderRadius: BorderRadius.circular(100),
                 ),
               ],
@@ -138,48 +136,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: MyAppBar(
-      //   navBar: navbarLight,
-      //   title:
-      //       '${months[widget.day.month - 1]} - ${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
-      // ),
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: AppColors.white,
-          statusBarIconBrightness: Brightness.dark,
-          systemNavigationBarColor: AppColors.white,
-          systemNavigationBarIconBrightness: Brightness.dark,
-        ),
-        foregroundColor: AppColors.primary,
-        centerTitle: false,
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        leadingWidth: 200,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 10),
-          child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    child: const Icon(Icons.keyboard_arrow_left, size: 22),
-                  ),
-                ),
-                const Text(
-                  'Voltar',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      appBar: const GoBackAppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -202,6 +159,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 32,
+                          height: 1.3,
                         ),
                       ),
                       const SizedBox(height: 42),

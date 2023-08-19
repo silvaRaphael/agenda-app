@@ -9,12 +9,22 @@ import 'package:agenda/utils/constants.dart';
 import 'package:agenda/utils/appointments.dart';
 
 class CalendarTab extends StatefulWidget {
-  final Function(Map<String, dynamic> a, DateTime? b) openEditScreen;
-  final List<dynamic> Function(DateTime day) getAppointmentsForDay;
+  final Function(Map<String, dynamic>, DateTime?) openEditScreen;
+  final List<dynamic> Function(DateTime) getAppointmentsForDay;
+  DateTime? selectedDay;
+  final Function(DateTime?) setSelectedDay;
+  final Function(bool) multiSelectDays;
+  final Function(List<DateTime>) multiSelectedDays;
+  final Function(List) setDayAppointments;
 
-  const CalendarTab({
+  CalendarTab({
     required this.openEditScreen,
     required this.getAppointmentsForDay,
+    required this.selectedDay,
+    required this.setSelectedDay,
+    required this.multiSelectDays,
+    required this.multiSelectedDays,
+    required this.setDayAppointments,
     super.key,
   });
 
@@ -23,42 +33,25 @@ class CalendarTab extends StatefulWidget {
 }
 
 class _CalendarTabState extends State<CalendarTab> {
-  DateTime firstDayOfWeek = DateTime(DateTime.now().year, DateTime.now().month,
-      DateTime.now().day - DateTime.now().weekday % 7);
-
-  DateTime lastDayOfMonth =
-      DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
-
   bool multiSelectDays = false;
   DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
   final List<DateTime> _multiSelectedDays = [];
 
-  late int remainingWeeks;
+  List _dayAppointments = [];
 
-  List<List> monthWeeks = [];
+  void _getDayAppointments(List<DateTime?> days) {
+    List setDayAppointments = [];
 
-  List dayAppointments = [];
+    for (var day in days) {
+      if (day == null) continue;
+      setDayAppointments = widget.getAppointmentsForDay(day);
+    }
 
-  void _getDayAppointments(DateTime? day) {
     setState(() {
-      dayAppointments = day == null ? [] : widget.getAppointmentsForDay(day);
+      _dayAppointments = setDayAppointments;
     });
-  }
 
-  @override
-  void initState() {
-    super.initState();
-
-    remainingWeeks = ((lastDayOfMonth.difference(DateTime.now()).inDays +
-                DateTime.now().weekday) /
-            7)
-        .ceil();
-
-    monthWeeks = List.generate(remainingWeeks, (index) => [index, index == 0]);
-
-    _selectedDay = _focusedDay;
-    _getDayAppointments(_selectedDay);
+    widget.setDayAppointments(_dayAppointments);
   }
 
   @override
@@ -77,10 +70,13 @@ class _CalendarTabState extends State<CalendarTab> {
             eventLoader: widget.getAppointmentsForDay,
             onPageChanged: (focusedDay) {
               setState(() {
-                _selectedDay = null;
+                widget.selectedDay = null;
                 _focusedDay = focusedDay;
               });
-              _getDayAppointments(_selectedDay);
+              widget.setSelectedDay(widget.selectedDay);
+              widget.multiSelectDays(multiSelectDays);
+              widget.multiSelectedDays(_multiSelectedDays);
+              _getDayAppointments([widget.selectedDay]);
             },
             onDaySelected: (selectedDay, focusedDay) {
               if (selectedDay.month != focusedDay.month) return;
@@ -95,12 +91,16 @@ class _CalendarTabState extends State<CalendarTab> {
                     _multiSelectedDays.add(selectedDay);
                   }
                 } else {
-                  _selectedDay =
-                      _selectedDay == selectedDay ? null : selectedDay;
+                  widget.selectedDay =
+                      widget.selectedDay == selectedDay ? null : selectedDay;
                   _focusedDay = focusedDay;
                 }
               });
-              _getDayAppointments(multiSelectDays ? null : _selectedDay);
+              widget.setSelectedDay(widget.selectedDay);
+              widget.multiSelectDays(multiSelectDays);
+              widget.multiSelectedDays(_multiSelectedDays);
+              _getDayAppointments(
+                  multiSelectDays ? _multiSelectedDays : [widget.selectedDay]);
             },
             onDayLongPressed: (selectedDay, focusedDay) {
               if (selectedDay.month != focusedDay.month) return;
@@ -111,14 +111,17 @@ class _CalendarTabState extends State<CalendarTab> {
                 } else {
                   _multiSelectedDays.add(selectedDay);
                   multiSelectDays = true;
-                  _selectedDay = null;
+                  widget.selectedDay = null;
                   _focusedDay = focusedDay;
-                  _getDayAppointments(_selectedDay);
                 }
               });
+              widget.setSelectedDay(widget.selectedDay);
+              widget.multiSelectDays(multiSelectDays);
+              widget.multiSelectedDays(_multiSelectedDays);
+              _getDayAppointments([widget.selectedDay]);
             },
             selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
+              return isSameDay(widget.selectedDay, day);
             },
             headerStyle: HeaderStyle(
               titleTextFormatter: (date, locale) =>
@@ -169,8 +172,13 @@ class _CalendarTabState extends State<CalendarTab> {
               ),
               todayBuilder: (context, day, focusedDay) => MyCalendarDay(
                 day: day,
-                backgroundColor: Colors.blue[700],
-                color: AppColors.white,
+                backgroundColor:
+                    multiSelectDays && _multiSelectedDays.contains(day)
+                        ? Colors.greenAccent[700]
+                        : AppColors.grey,
+                color: multiSelectDays && _multiSelectedDays.contains(day)
+                    ? AppColors.white
+                    : AppColors.primary,
               ),
               markerBuilder: (context, day, appointments) {
                 if (appointments.isEmpty) return Container();
@@ -238,12 +246,12 @@ class _CalendarTabState extends State<CalendarTab> {
             ),
           ),
         ),
-        dayAppointments.isEmpty || _selectedDay == null
+        _dayAppointments.isEmpty || widget.selectedDay == null
             ? Container()
             : Column(
                 children: [
                   Text(
-                    'Agenda do dia ${_selectedDay!.day}',
+                    'Agenda do dia ${widget.selectedDay!.day}',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w800,
@@ -255,13 +263,13 @@ class _CalendarTabState extends State<CalendarTab> {
                     child: ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: dayAppointments.length,
+                      itemCount: _dayAppointments.length,
                       itemBuilder: (context, index) {
                         Map<String, dynamic> appointmentMap =
-                            dayAppointments[index] as Map<String, dynamic>;
+                            _dayAppointments[index] as Map<String, dynamic>;
                         return AppointmentsListTile(
-                          appointment: dayAppointments[index],
-                          date: _selectedDay!,
+                          appointment: _dayAppointments[index],
+                          date: widget.selectedDay!,
                           onTap: () =>
                               widget.openEditScreen(appointmentMap, null),
                         );

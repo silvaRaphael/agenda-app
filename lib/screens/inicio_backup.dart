@@ -6,8 +6,6 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:agenda/screens/add_appointment.dart';
 import 'package:agenda/screens/edit_appointment.dart';
 
-import 'package:agenda/components/app_bar.dart';
-
 import 'package:agenda/utils/appointments.dart';
 import 'package:agenda/utils/constants.dart';
 import 'package:agenda/utils/api.dart';
@@ -154,9 +152,7 @@ class _InicioScreenState extends State<InicioScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
-        navBar: navbarLight,
-        backButton: false,
+      appBar: AppBar(
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: AppColors.tertiary,
