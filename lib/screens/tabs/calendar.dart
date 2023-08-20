@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import 'package:agenda/components/my_tab.dart';
-import 'package:agenda/components/appointments_list_tile.dart';
+import 'package:agenda/widgets/my_tab.dart';
+import 'package:agenda/widgets/appointments_list_tile.dart';
 
 import 'package:agenda/repositories/appointments.dart';
 
@@ -40,7 +40,7 @@ class _CalendarTabState extends State<CalendarTab> {
     return MyTab(
       children: [
         Padding(
-          padding: const EdgeInsets.all(30),
+          padding: const EdgeInsets.all(12),
           child: TableCalendar(
             focusedDay: _focusedDay,
             firstDay: DateTime(2000),

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-import 'package:agenda/components/appointments_list_tile.dart';
-import 'package:agenda/components/my_tab.dart';
+import 'package:agenda/widgets/appointments_list_tile.dart';
+import 'package:agenda/widgets/my_tab.dart';
 
 import 'package:agenda/repositories/appointments.dart';
 
@@ -74,7 +74,6 @@ class _HomeTabState extends State<HomeTab> {
                 textAlign: TextAlign.start,
               ),
             ),
-            const SizedBox(height: 26),
             ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
@@ -83,7 +82,7 @@ class _HomeTabState extends State<HomeTab> {
                 DateTime week = firstDayOfWeek.add(Duration(days: index * 7));
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  margin: const EdgeInsets.only(bottom: 24),
+                  margin: const EdgeInsets.only(top: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -112,9 +111,6 @@ class _HomeTabState extends State<HomeTab> {
                               .watch<AppointmentsRepository>()
                               .dayAppointments(weekDay);
 
-                          // print(weekDay);
-                          // print(weekDayAppointments);
-
                           if (weekDayAppointments.isEmpty) {
                             return Container();
                           }
@@ -123,7 +119,7 @@ class _HomeTabState extends State<HomeTab> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               SizedBox(
-                                width: 26,
+                                width: 30,
                                 child: Text(
                                   '${weekDay.day}\n${weekDays[index].substring(0, 3)}',
                                   style: TextStyle(
