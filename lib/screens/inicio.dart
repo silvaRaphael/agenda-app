@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+import 'package:provider/provider.dart';
+
 import 'package:agenda/screens/tabs/home.dart';
 import 'package:agenda/screens/tabs/calendar.dart';
 import 'package:agenda/screens/add_appointment.dart';
 import 'package:agenda/screens/edit_appointment.dart';
 
+import 'package:agenda/repositories/appointments.dart';
+
 import 'package:agenda/components/my_tab.dart';
 
 import 'package:agenda/utils/constants.dart';
 import 'package:agenda/utils/models.dart';
-import 'package:agenda/repositories/appointments.dart';
 
 class InicioScreen extends StatefulWidget {
   const InicioScreen({super.key});
@@ -22,6 +25,8 @@ class InicioScreen extends StatefulWidget {
 
 class _InicioScreenState extends State<InicioScreen>
     with TickerProviderStateMixin {
+  late AppointmentsRepository appointmentsRepository;
+
   int _tabIndex = 0;
 
   final List<ModelNavBarItem> _bottomNavBarItemsList = const [
@@ -42,70 +47,28 @@ class _InicioScreenState extends State<InicioScreen>
     ),
   ];
 
-  final DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-  List<DateTime> _multiSelectedDays = [];
-  bool multiSelectDays = false;
-  bool addAppointmentButtonVisible = false;
-
-  Map<DateTime, List> _appointments = {};
-  List _dayAppointments = [];
-
-  void _getDayAppointments(DateTime? day) {
-    setState(() {
-      _dayAppointments = day == null ? [] : _getAppointmentsForDay(day);
-    });
-  }
-
-  void _getAppointments() {
-    Map<DateTime, List> appointments = AppointmentsRepository(null).list;
-
-    setState(() {
-      _appointments = appointments;
-    });
-  }
-
-  List _getAppointmentsForDay(DateTime day) {
-    final formattedDay = DateTime(day.year, day.month, day.day);
-
-    final appointmentsForDay = _appointments[formattedDay];
-
-    return appointmentsForDay ?? [];
-  }
-
-  void initAppointments(DateTime? day) {
-    _getAppointments();
-    _getDayAppointments(day);
-  }
-
   void _openAddScreen() {
-    List<DateTime> sortedMultiSelectedDays = _multiSelectedDays..sort();
+    List<DateTime> sortedMultiSelectedDays =
+        appointmentsRepository.multiSelectedDates..sort();
 
     Navigator.push(
       context,
       CupertinoPageRoute(
-        builder: (context) => multiSelectDays && _multiSelectedDays.isNotEmpty
+        builder: (context) => appointmentsRepository.isMultiSelectActive &&
+                sortedMultiSelectedDays.isNotEmpty
             ? AddAppointmentScreen(
-                day: sortedMultiSelectedDays.first,
-                days: sortedMultiSelectedDays,
+                date: sortedMultiSelectedDays.first,
+                dates: sortedMultiSelectedDays,
               )
             : AddAppointmentScreen(
-                day: _selectedDay!,
-                usedMarkers: _dayAppointments
+                date: appointmentsRepository.selectedDate!,
+                usedMarkers: appointmentsRepository
+                    .dayAppointments(appointmentsRepository.selectedDate)
                     .map((appointment) => appointment['marker'])
                     .toList(),
               ),
       ),
-    ).then((value) {
-      setState(() {
-        _selectedDay = null;
-        if (multiSelectDays) {
-          _multiSelectedDays.clear();
-          multiSelectDays = false;
-        }
-      });
-      initAppointments(null);
-    });
+    );
   }
 
   void _openEditScreen(
@@ -125,14 +88,9 @@ class _InicioScreenState extends State<InicioScreen>
   }
 
   @override
-  void initState() {
-    super.initState();
-
-    initAppointments(_focusedDay);
-  }
-
-  @override
   Widget build(BuildContext context) {
+    appointmentsRepository = context.watch<AppointmentsRepository>();
+
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle(
@@ -155,7 +113,8 @@ class _InicioScreenState extends State<InicioScreen>
         backgroundColor: AppColors.white,
         elevation: 0,
         actions: [
-          _selectedDay != null || _multiSelectedDays.isNotEmpty
+          _tabIndex == 1 && appointmentsRepository.selectedDate != null ||
+                  appointmentsRepository.multiSelectedDates.isNotEmpty
               ? Padding(
                   padding: const EdgeInsets.only(right: 20),
                   child: GestureDetector(
@@ -207,11 +166,7 @@ class _InicioScreenState extends State<InicioScreen>
         children: [
           Positioned.fill(
             child: [
-              HomeTab(
-                openEditScreen: _openEditScreen,
-                getAppointmentsForDay: _getAppointmentsForDay,
-                appointments: _appointments,
-              ),
+              HomeTab(openEditScreen: _openEditScreen),
               CalendarTab(openEditScreen: _openEditScreen),
               const MyTab(
                 children: [

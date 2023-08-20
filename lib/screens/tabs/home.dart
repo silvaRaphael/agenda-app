@@ -13,13 +13,9 @@ import 'package:agenda/utils/constants.dart';
 
 class HomeTab extends StatefulWidget {
   final Function(Map<String, dynamic>, List, DateTime) openEditScreen;
-  final List<dynamic> Function(DateTime day) getAppointmentsForDay;
-  final Map<DateTime, List> appointments;
 
   const HomeTab({
     required this.openEditScreen,
-    required this.getAppointmentsForDay,
-    required this.appointments,
     super.key,
   });
 
@@ -116,8 +112,8 @@ class _HomeTabState extends State<HomeTab> {
                               .watch<AppointmentsRepository>()
                               .dayAppointments(weekDay);
 
-                          print(weekDay);
-                          print(weekDayAppointments);
+                          // print(weekDay);
+                          // print(weekDayAppointments);
 
                           if (weekDayAppointments.isEmpty) {
                             return Container();
@@ -167,7 +163,7 @@ class _HomeTabState extends State<HomeTab> {
                                         onTap: () => widget.openEditScreen(
                                           appointmentMap,
                                           weekDayAppointments,
-                                          weekDay,
+                                          DateTime.parse('${weekDay}Z'),
                                         ),
                                       );
                                     },

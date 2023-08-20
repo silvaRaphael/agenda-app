@@ -146,7 +146,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    appointmentsRepository = context.read<AppointmentsRepository>();
+    appointmentsRepository = context.watch<AppointmentsRepository>();
 
     return Scaffold(
       appBar: const GoBackAppBar(),

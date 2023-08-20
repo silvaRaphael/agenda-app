@@ -83,12 +83,12 @@ class AppointmentsRepository extends ChangeNotifier {
     return collection[index] ?? [];
   }
 
-  void create(dynamic body) {
-    List collection = box.get(key.toString()) ?? [];
+  void create(dynamic body, {required DateTime date}) {
+    List collection = box.get(date.toString()) ?? [];
 
     collection.add(jsonEncode(body));
 
-    box.put(key.toString(), collection);
+    box.put(date.toString(), collection);
 
     notifyListeners();
   }

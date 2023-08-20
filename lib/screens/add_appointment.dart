@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
+import 'package:agenda/repositories/appointments.dart';
+
 import 'package:agenda/components/app_bar.dart';
 import 'package:agenda/components/markers_list.dart';
 import 'package:agenda/components/inline_radio.dart';
 import 'package:agenda/components/outline_input.dart';
 import 'package:agenda/components/icon_text_button.dart';
 
-import 'package:agenda/utils/api.dart';
 import 'package:agenda/utils/appointments.dart';
 import 'package:agenda/utils/constants.dart';
 
 class AddAppointmentScreen extends StatefulWidget {
-  final DateTime day;
-  final List<DateTime>? days;
+  final DateTime date;
+  final List<DateTime>? dates;
   final List<dynamic>? usedMarkers;
 
   const AddAppointmentScreen({
-    required this.day,
-    this.days,
+    required this.date,
+    this.dates,
     this.usedMarkers,
     super.key,
   });
@@ -27,6 +30,8 @@ class AddAppointmentScreen extends StatefulWidget {
 }
 
 class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
+  late AppointmentsRepository appointmentsRepository;
+
   late MyTextEditingController _title;
   final MyTextEditingController _description = MyTextEditingController();
   int _group = 0;
@@ -63,14 +68,18 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
       'marker': _marker,
     };
 
-    if (widget.days != null) {
-      for (var day in widget.days!) {
-        AppointmentsRepository(day)
-            .create({'id': randomID(), ...appointmentObject});
+    if (widget.dates != null) {
+      for (var day in widget.dates!) {
+        appointmentsRepository.create(
+          date: day,
+          {'id': randomID(), ...appointmentObject},
+        );
       }
     } else {
-      AppointmentsRepository(widget.day)
-          .create({'id': randomID(), ...appointmentObject});
+      appointmentsRepository.create(
+        date: widget.date,
+        {'id': randomID(), ...appointmentObject},
+      );
     }
 
     Navigator.of(context).pop();
@@ -85,6 +94,8 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    appointmentsRepository = context.watch<AppointmentsRepository>();
+
     return Scaffold(
       appBar: const GoBackAppBar(),
       body: SafeArea(
@@ -105,9 +116,9 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.days != null
-                            ? '${months[widget.day.month - 1]}\n${widget.days!.map((day) => day.day.toString().padLeft(2, '0'))}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}'
-                            : '${months[widget.day.month - 1]}\n${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+                        widget.dates != null
+                            ? '${months[widget.date.month - 1]}\n${widget.dates!.map((day) => day.day.toString().padLeft(2, '0'))}/${widget.date.month.toString().padLeft(2, '0')}/${widget.date.year}'
+                            : '${months[widget.date.month - 1]}\n${widget.date.day.toString().padLeft(2, '0')}/${widget.date.month.toString().padLeft(2, '0')}/${widget.date.year}',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 32,
@@ -181,7 +192,7 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                   Column(
                     children: [
                       MyIconTextButton(
-                        label: widget.days != null
+                        label: widget.dates != null
                             ? 'Adicionar Agendas'
                             : 'Adicionar Agenda',
                         icon: Icons.add,
