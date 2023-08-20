@@ -5,21 +5,15 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:agenda/screens/inicio.dart';
-
 import 'package:agenda/repositories/appointments.dart';
+import 'package:agenda/repositories/bills.dart';
+
+import 'package:agenda/screens/home.dart';
+
 import 'package:agenda/utils/constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
-      systemNavigationBarColor: AppColors.grey,
-      systemNavigationBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.dark,
-    ),
-  );
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -28,10 +22,14 @@ void main() async {
 
   await Hive.initFlutter();
   await Hive.openBox('appointments');
+  await Hive.openBox('bills');
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => AppointmentsRepository(null),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppointmentsRepository()),
+        ChangeNotifierProvider(create: (_) => BillsRepository()),
+      ],
       child: const MyApp(),
     ),
   );

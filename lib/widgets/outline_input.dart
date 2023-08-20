@@ -17,6 +17,7 @@ InputDecoration myInputDecoration(MyOutlineInput widget, bool hasError) {
     suffixIconColor: AppColors.secondary,
     suffixIcon: widget.suffixIcon,
     labelText: widget.labelText,
+    counterText: '',
     hintText: widget.hintText,
     labelStyle: TextStyle(
       color: hasError ? AppColors.error : AppColors.secondary,
@@ -75,6 +76,7 @@ class MyTextEditingController extends TextEditingController {
 
 class MyOutlineInput extends StatefulWidget {
   final MyTextEditingController controller;
+  final int? maxLength;
   final TextInputType? keyboardType;
   final bool? obscureText;
   final String labelText;
@@ -84,6 +86,7 @@ class MyOutlineInput extends StatefulWidget {
   final MyInputValidator? validator;
   const MyOutlineInput({
     required this.controller,
+    this.maxLength,
     this.keyboardType,
     this.obscureText,
     required this.labelText,
@@ -108,6 +111,7 @@ class _MyOutlineInputState extends State<MyOutlineInput> {
           controller: widget.controller,
           maxLines: null,
           autocorrect: false,
+          maxLength: widget.maxLength,
           keyboardType: widget.keyboardType ?? TextInputType.text,
           obscureText: widget.obscureText != null ? widget.obscureText! : false,
           onChanged: widget.onChanged,

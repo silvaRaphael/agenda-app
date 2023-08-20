@@ -1,15 +1,16 @@
-import 'package:agenda/repositories/appointments.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:provider/provider.dart';
 
-import 'package:agenda/components/app_bar.dart';
-import 'package:agenda/components/markers_list.dart';
-import 'package:agenda/components/icon_button.dart';
-import 'package:agenda/components/inline_radio.dart';
-import 'package:agenda/components/outline_input.dart';
-import 'package:agenda/components/icon_text_button.dart';
+import 'package:agenda/repositories/appointments.dart';
+
+import 'package:agenda/widgets/app_bar.dart';
+import 'package:agenda/widgets/appointments_markers_list.dart';
+import 'package:agenda/widgets/icon_button.dart';
+import 'package:agenda/widgets/inline_radio.dart';
+import 'package:agenda/widgets/outline_input.dart';
+import 'package:agenda/widgets/icon_text_button.dart';
 
 import 'package:agenda/utils/appointments.dart';
 import 'package:agenda/utils/constants.dart';
@@ -56,7 +57,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
     });
   }
 
-  void _setMarker(marker) {
+  void _setMarker(int marker) {
     setState(() {
       _marker = marker;
     });
@@ -226,7 +227,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              MyMarkersList(
+                              AppointmentsMarkersList(
                                 markers: markers,
                                 blockedMarkers: widget.usedMarkers,
                                 onTap: _setMarker,

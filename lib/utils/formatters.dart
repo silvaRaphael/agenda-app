@@ -122,3 +122,13 @@ String formatCEP(String input) {
 
   return input;
 }
+
+String formatCurrency(String value) {
+  value = value.replaceAll(RegExp(r'\D'), '');
+  List<String> valueChars = value.split('');
+  if (value.trim().length > 2) {
+    valueChars.insert(value.trim().length - 2, ',');
+  }
+  value = valueChars.join('');
+  return value;
+}

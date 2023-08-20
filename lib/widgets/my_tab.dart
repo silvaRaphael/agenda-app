@@ -14,14 +14,19 @@ class MyTab extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            minWidth: MediaQuery.of(context).size.width,
+            minWidth: MediaQuery.of(context).size.width > 0
+                ? MediaQuery.of(context).size.width
+                : 0,
             minHeight:
-                MediaQuery.of(context).size.height - kToolbarHeight * 1.9,
+                (MediaQuery.of(context).size.height > kToolbarHeight * 1.9
+                        ? MediaQuery.of(context).size.height
+                        : kToolbarHeight * 1.9) -
+                    kToolbarHeight * 1.9,
           ),
           child: Column(
             children: [
               ...children,
-              const SizedBox(height: 70),
+              const SizedBox(height: 100),
             ],
           ),
         ),

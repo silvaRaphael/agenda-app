@@ -1,3 +1,6 @@
+import 'package:agenda/screens/add_bill.dart';
+import 'package:agenda/screens/tabs/edit_bill.dart';
+import 'package:agenda/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -8,10 +11,10 @@ import 'package:agenda/screens/tabs/home.dart';
 import 'package:agenda/screens/tabs/calendar.dart';
 import 'package:agenda/screens/add_appointment.dart';
 import 'package:agenda/screens/edit_appointment.dart';
+import 'package:agenda/screens/tabs/biils.dart';
 
 import 'package:agenda/repositories/appointments.dart';
-
-import 'package:agenda/components/my_tab.dart';
+import 'package:agenda/repositories/bills.dart';
 
 import 'package:agenda/utils/constants.dart';
 import 'package:agenda/utils/models.dart';
@@ -26,6 +29,7 @@ class InicioScreen extends StatefulWidget {
 class _InicioScreenState extends State<InicioScreen>
     with TickerProviderStateMixin {
   late AppointmentsRepository appointmentsRepository;
+  late BillsRepository billsRepository;
 
   int _tabIndex = 0;
 
@@ -47,7 +51,7 @@ class _InicioScreenState extends State<InicioScreen>
     ),
   ];
 
-  void _openAddScreen() {
+  void _openAddAppointmentScreen() {
     List<DateTime> sortedMultiSelectedDays =
         appointmentsRepository.multiSelectedDates..sort();
 
@@ -71,7 +75,7 @@ class _InicioScreenState extends State<InicioScreen>
     );
   }
 
-  void _openEditScreen(
+  void _openEditAppointmentScreen(
       Map<String, dynamic> appointment, List dayAppointments, DateTime date) {
     Navigator.push(
       context,
@@ -87,9 +91,30 @@ class _InicioScreenState extends State<InicioScreen>
     );
   }
 
+  void _openAddBillScreen() {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => AddBillScreen(
+          day: billsRepository.selectedDay!,
+        ),
+      ),
+    );
+  }
+
+  void _openEditBillScreen(Map<String, dynamic> bill, int day) {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => EditBillScreen(day: day, bill: bill),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     appointmentsRepository = context.watch<AppointmentsRepository>();
+    billsRepository = context.watch<BillsRepository>();
 
     return Scaffold(
       appBar: AppBar(
@@ -115,28 +140,10 @@ class _InicioScreenState extends State<InicioScreen>
         actions: [
           _tabIndex == 1 && appointmentsRepository.selectedDate != null ||
                   appointmentsRepository.multiSelectedDates.isNotEmpty
-              ? Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: GestureDetector(
-                    onTap: _openAddScreen,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 1,
-                            color: Colors.black12,
-                          ),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: const Icon(
-                          Icons.add,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
+              ? appBarAddButton(_openAddAppointmentScreen)
+              : Container(),
+          _tabIndex == 2 && billsRepository.selectedDay != null
+              ? appBarAddButton(_openAddBillScreen)
               : Container(),
           Padding(
             padding: const EdgeInsets.only(right: 20),
@@ -153,7 +160,7 @@ class _InicioScreenState extends State<InicioScreen>
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: const Icon(
-                    Icons.calendar_month_outlined,
+                    Icons.notifications_none_rounded,
                     size: 18,
                   ),
                 ),
@@ -166,15 +173,9 @@ class _InicioScreenState extends State<InicioScreen>
         children: [
           Positioned.fill(
             child: [
-              HomeTab(openEditScreen: _openEditScreen),
-              CalendarTab(openEditScreen: _openEditScreen),
-              const MyTab(
-                children: [
-                  Center(
-                    child: Text('Cobranças'),
-                  ),
-                ],
-              ),
+              HomeTab(openEditScreen: _openEditAppointmentScreen),
+              CalendarTab(openEditScreen: _openEditAppointmentScreen),
+              BillsTab(openEditScreen: _openEditBillScreen),
             ][_tabIndex],
           ),
           // bottom navbar
@@ -182,49 +183,42 @@ class _InicioScreenState extends State<InicioScreen>
             left: 10,
             right: 10,
             bottom: 10,
-            child: SizedBox(
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 3,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.grey,
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _bottomNavBarItemsList.map((item) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _tabIndex = item.index;
-                          });
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: item.index == _tabIndex
-                                ? AppColors.white
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: Icon(
-                            item.index == _tabIndex
-                                ? item.iconActive
-                                : item.icon,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
+            child: BottomNavBar(
+              bottomNavBarItemsList: _bottomNavBarItemsList,
+              tabIndex: _tabIndex,
+              onTap: (int index) {
+                setState(() {
+                  _tabIndex = index;
+                });
+              },
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget appBarAddButton(void Function()? onTap) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 20),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              border: Border.all(
+                width: 1,
+                color: Colors.black12,
+              ),
+              borderRadius: BorderRadius.circular(100),
+            ),
+            child: const Icon(
+              Icons.add,
+              size: 18,
+            ),
+          ),
+        ),
       ),
     );
   }

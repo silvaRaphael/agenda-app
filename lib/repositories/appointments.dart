@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class AppointmentsRepository extends ChangeNotifier {
-  final dynamic key;
-
-  AppointmentsRepository(this.key);
-
   final Box box = Hive.box('appointments');
 
   DateTime? _selectedDate = DateTime.now();
@@ -70,17 +66,6 @@ class AppointmentsRepository extends ChangeNotifier {
     final appointmentsForDate = list[formattedDate];
 
     return appointmentsForDate ?? [];
-  }
-
-  dynamic getOne({required String id}) {
-    List collection = box.get(key.toString()) ?? [];
-
-    int index = collection.indexWhere((element) {
-      Map<String, dynamic> parsedElement = jsonDecode(element);
-      return parsedElement['id'] == id;
-    });
-
-    return collection[index] ?? [];
   }
 
   void create(dynamic body, {required DateTime date}) {

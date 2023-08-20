@@ -12,18 +12,14 @@ class ModelNavBarItem {
   }) : iconActive = iconActive ?? icon;
 }
 
-class ModelAgendamento {
-  final String name;
-  final DateTime date;
-  final double value;
-  final int type;
-  final bool entry;
+class ModelBillsMarkers {
+  final String label;
+  final Color color;
+  final IconData icon;
 
-  const ModelAgendamento({
-    required this.name,
-    required this.date,
-    required this.value,
-    required this.type,
-    required this.entry,
+  const ModelBillsMarkers({
+    required this.label,
+    required this.color,
+    required this.icon,
   });
 }

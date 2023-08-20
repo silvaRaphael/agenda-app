@@ -14,7 +14,7 @@ class AppColors {
   static Color dark = const Color(0x2B2B2BFF);
   static Color white = const Color(0xFFFFFFFF);
   static Color success = const Color(0xFF6BF178);
-  static Color error = const Color(0xFFFF5964);
+  static Color error = const Color(0xFFE82835);
 }
 
 SystemUiOverlayStyle navbarAccent = SystemUiOverlayStyle(

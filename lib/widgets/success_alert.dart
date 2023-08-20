@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:agenda/components/loading_check_animated.dart';
-import 'package:agenda/components/icon_text_button.dart';
+import 'package:agenda/widgets/loading_check_animated.dart';
+import 'package:agenda/widgets/icon_text_button.dart';
 
 import 'package:agenda/utils/constants.dart';
 

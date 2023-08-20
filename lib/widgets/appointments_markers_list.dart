@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:agenda/components/icon_button.dart';
+import 'package:agenda/widgets/icon_button.dart';
 
-class MyMarkersList extends StatelessWidget {
+class AppointmentsMarkersList extends StatelessWidget {
   final List markers;
   final List? blockedMarkers;
   final int marker;
   final void Function(int index)? onTap;
 
-  const MyMarkersList({
+  const AppointmentsMarkersList({
     required this.markers,
     this.blockedMarkers,
     required this.marker,
