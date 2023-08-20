@@ -129,6 +129,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         billsRepository.dayBills(now.add(const Duration(days: 2)).day)
       ]
     ];
+
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle(
