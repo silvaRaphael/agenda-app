@@ -98,7 +98,7 @@ class _InicioScreenState extends State<InicioScreen>
       context,
       CupertinoPageRoute(
         builder: (context) => EditAppointmentScreen(
-          day: day != null
+          date: day != null
               ? DateTime.parse('${day.toString()}Z')
               : _selectedDay!,
           usedMarkers: _dayAppointments

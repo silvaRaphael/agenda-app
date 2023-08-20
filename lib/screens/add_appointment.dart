@@ -182,12 +182,12 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     children: [
                       MyIconTextButton(
                         label: widget.days != null
-                            ? 'Adicionar Agendamentos'
-                            : 'Adicionar Agendamento',
+                            ? 'Adicionar Agendas'
+                            : 'Adicionar Agenda',
                         icon: Icons.add,
                         onPressed: _addAppointment,
-                        color: Colors.black.withOpacity(.85),
-                        backgroundColor: AppColors.grey,
+                        color: AppColors.white,
+                        backgroundColor: Colors.black54,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       const SizedBox(height: 18),

@@ -1,30 +1,22 @@
 import 'package:flutter/material.dart';
+
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'package:agenda/components/my_tab.dart';
 import 'package:agenda/components/appointments_list_tile.dart';
+
+import 'package:agenda/repositories/appointments.dart';
 
 import 'package:agenda/utils/week_days.dart';
 import 'package:agenda/utils/constants.dart';
 import 'package:agenda/utils/appointments.dart';
 
 class CalendarTab extends StatefulWidget {
-  final Function(Map<String, dynamic>, DateTime?) openEditScreen;
-  final List<dynamic> Function(DateTime) getAppointmentsForDay;
-  DateTime? selectedDay;
-  final Function(DateTime?) setSelectedDay;
-  final Function(bool) multiSelectDays;
-  final Function(List<DateTime>) multiSelectedDays;
-  final Function(List) setDayAppointments;
+  final Function(Map<String, dynamic>, List, DateTime) openEditScreen;
 
-  CalendarTab({
+  const CalendarTab({
     required this.openEditScreen,
-    required this.getAppointmentsForDay,
-    required this.selectedDay,
-    required this.setSelectedDay,
-    required this.multiSelectDays,
-    required this.multiSelectedDays,
-    required this.setDayAppointments,
     super.key,
   });
 
@@ -33,29 +25,18 @@ class CalendarTab extends StatefulWidget {
 }
 
 class _CalendarTabState extends State<CalendarTab> {
-  bool multiSelectDays = false;
+  late AppointmentsRepository appointmentsRepository;
+  late List dayAppointments;
+
   DateTime _focusedDay = DateTime.now();
-  final List<DateTime> _multiSelectedDays = [];
-
-  List _dayAppointments = [];
-
-  void _getDayAppointments(List<DateTime?> days) {
-    List setDayAppointments = [];
-
-    for (var day in days) {
-      if (day == null) continue;
-      setDayAppointments = widget.getAppointmentsForDay(day);
-    }
-
-    setState(() {
-      _dayAppointments = setDayAppointments;
-    });
-
-    widget.setDayAppointments(_dayAppointments);
-  }
 
   @override
   Widget build(BuildContext context) {
+    appointmentsRepository = context.watch<AppointmentsRepository>();
+
+    dayAppointments = appointmentsRepository
+        .dayAppointments(appointmentsRepository.selectedDate);
+
     return MyTab(
       children: [
         Padding(
@@ -67,61 +48,37 @@ class _CalendarTabState extends State<CalendarTab> {
             availableGestures: AvailableGestures.horizontalSwipe,
             weekendDays: const [7, 6],
             startingDayOfWeek: StartingDayOfWeek.sunday,
-            eventLoader: widget.getAppointmentsForDay,
+            eventLoader: appointmentsRepository.dayAppointments,
             onPageChanged: (focusedDay) {
-              setState(() {
-                widget.selectedDay = null;
-                _focusedDay = focusedDay;
-              });
-              widget.setSelectedDay(widget.selectedDay);
-              widget.multiSelectDays(multiSelectDays);
-              widget.multiSelectedDays(_multiSelectedDays);
-              _getDayAppointments([widget.selectedDay]);
+              _focusedDay = focusedDay;
+              appointmentsRepository.setSelectedDate(null);
             },
             onDaySelected: (selectedDay, focusedDay) {
               if (selectedDay.month != focusedDay.month) return;
-              setState(() {
-                if (multiSelectDays) {
-                  if (_multiSelectedDays.contains(selectedDay)) {
-                    _multiSelectedDays.remove(selectedDay);
-                    if (_multiSelectedDays.isEmpty) {
-                      multiSelectDays = false;
-                    }
-                  } else {
-                    _multiSelectedDays.add(selectedDay);
-                  }
+
+              if (appointmentsRepository.isMultiSelectActive) {
+                appointmentsRepository.setMultiSelectedDates(selectedDay);
+              } else {
+                if (appointmentsRepository.selectedDate == selectedDay) {
+                  appointmentsRepository.setSelectedDate(null);
                 } else {
-                  widget.selectedDay =
-                      widget.selectedDay == selectedDay ? null : selectedDay;
-                  _focusedDay = focusedDay;
+                  appointmentsRepository.setSelectedDate(selectedDay);
                 }
-              });
-              widget.setSelectedDay(widget.selectedDay);
-              widget.multiSelectDays(multiSelectDays);
-              widget.multiSelectedDays(_multiSelectedDays);
-              _getDayAppointments(
-                  multiSelectDays ? _multiSelectedDays : [widget.selectedDay]);
+                _focusedDay = focusedDay;
+              }
             },
             onDayLongPressed: (selectedDay, focusedDay) {
               if (selectedDay.month != focusedDay.month) return;
-              setState(() {
-                if (multiSelectDays == true) {
-                  _multiSelectedDays.clear();
-                  multiSelectDays = false;
-                } else {
-                  _multiSelectedDays.add(selectedDay);
-                  multiSelectDays = true;
-                  widget.selectedDay = null;
-                  _focusedDay = focusedDay;
-                }
-              });
-              widget.setSelectedDay(widget.selectedDay);
-              widget.multiSelectDays(multiSelectDays);
-              widget.multiSelectedDays(_multiSelectedDays);
-              _getDayAppointments([widget.selectedDay]);
-            },
-            selectedDayPredicate: (day) {
-              return isSameDay(widget.selectedDay, day);
+
+              if (appointmentsRepository.isMultiSelectActive) {
+                appointmentsRepository.setIsMultiSelectActive(false);
+                appointmentsRepository.multiSelectedDates.clear();
+              } else {
+                appointmentsRepository.setSelectedDate(null);
+                appointmentsRepository.setIsMultiSelectActive(true);
+                appointmentsRepository.setMultiSelectedDates(selectedDay);
+                _focusedDay = focusedDay;
+              }
             },
             headerStyle: HeaderStyle(
               titleTextFormatter: (date, locale) =>
@@ -165,21 +122,8 @@ class _CalendarTabState extends State<CalendarTab> {
               CalendarFormat.week: 'Semana',
             },
             calendarBuilders: CalendarBuilders(
-              selectedBuilder: (context, day, focusedDay) => MyCalendarDay(
-                day: day,
-                backgroundColor: Colors.indigo,
-                color: AppColors.white,
-              ),
-              todayBuilder: (context, day, focusedDay) => MyCalendarDay(
-                day: day,
-                backgroundColor:
-                    multiSelectDays && _multiSelectedDays.contains(day)
-                        ? Colors.greenAccent[700]
-                        : AppColors.grey,
-                color: multiSelectDays && _multiSelectedDays.contains(day)
-                    ? AppColors.white
-                    : AppColors.primary,
-              ),
+              todayBuilder: dayBuilder,
+              defaultBuilder: dayBuilder,
               markerBuilder: (context, day, appointments) {
                 if (appointments.isEmpty) return Container();
                 int index = 0;
@@ -219,7 +163,7 @@ class _CalendarTabState extends State<CalendarTab> {
                   ),
                 );
               },
-              // default builders
+              // weekend days
               dowBuilder: (context, day) => Text(
                 weekDays[day.weekday - 1].substring(0, 3),
                 style: TextStyle(
@@ -231,27 +175,15 @@ class _CalendarTabState extends State<CalendarTab> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              defaultBuilder: (context, day, focusedDay) => MyCalendarDay(
-                day: day,
-                backgroundColor:
-                    multiSelectDays && _multiSelectedDays.contains(day)
-                        ? Colors.greenAccent[700]
-                        : null,
-                color: multiSelectDays && _multiSelectedDays.contains(day)
-                    ? AppColors.white
-                    : [6, 7].contains(day.weekday)
-                        ? AppColors.error
-                        : AppColors.primary,
-              ),
             ),
           ),
         ),
-        _dayAppointments.isEmpty || widget.selectedDay == null
+        dayAppointments.isEmpty || appointmentsRepository.selectedDate == null
             ? Container()
             : Column(
                 children: [
                   Text(
-                    'Agenda do dia ${widget.selectedDay!.day}',
+                    'Agenda do dia ${appointmentsRepository.selectedDate!.day}',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w800,
@@ -263,15 +195,20 @@ class _CalendarTabState extends State<CalendarTab> {
                     child: ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: _dayAppointments.length,
+                      itemCount: dayAppointments.length,
                       itemBuilder: (context, index) {
                         Map<String, dynamic> appointmentMap =
-                            _dayAppointments[index] as Map<String, dynamic>;
+                            dayAppointments[index] as Map<String, dynamic>;
                         return AppointmentsListTile(
-                          appointment: _dayAppointments[index],
-                          date: widget.selectedDay!,
-                          onTap: () =>
-                              widget.openEditScreen(appointmentMap, null),
+                          appointment: dayAppointments[index],
+                          date: appointmentsRepository.selectedDate!,
+                          onTap: () => widget.openEditScreen(
+                            appointmentMap,
+                            appointmentsRepository.dayAppointments(
+                              appointmentsRepository.selectedDate,
+                            ),
+                            appointmentsRepository.selectedDate!,
+                          ),
                         );
                       },
                     ),
@@ -279,6 +216,61 @@ class _CalendarTabState extends State<CalendarTab> {
                 ],
               ),
       ],
+    );
+  }
+
+  MyCalendarDay? dayBuilder(
+      BuildContext context, DateTime day, DateTime focusedDay) {
+    day = DateTime(day.year, day.month, day.day);
+    DateTime? selectedDate = appointmentsRepository.selectedDate;
+
+    if (appointmentsRepository.selectedDate != null) {
+      selectedDate = DateTime(
+        appointmentsRepository.selectedDate!.year,
+        appointmentsRepository.selectedDate!.month,
+        appointmentsRepository.selectedDate!.day,
+      );
+    }
+
+    if (selectedDate == day) {
+      return MyCalendarDay(
+        day: day,
+        backgroundColor: Colors.indigo,
+        color: AppColors.white,
+      );
+    }
+
+    if (appointmentsRepository.isMultiSelectActive &&
+        appointmentsRepository.multiSelectedDates
+            .contains(DateTime.parse('${day}Z'))) {
+      return MyCalendarDay(
+        day: day,
+        backgroundColor: Colors.greenAccent[700],
+        color: AppColors.white,
+      );
+    }
+
+    DateTime now = DateTime.now();
+    if (now.day == day.day) {
+      return MyCalendarDay(
+        day: day,
+        backgroundColor: Colors.grey[500],
+        color: AppColors.white,
+      );
+    }
+
+    return MyCalendarDay(
+      day: day,
+      backgroundColor: appointmentsRepository.isMultiSelectActive &&
+              appointmentsRepository.multiSelectedDates.contains(day)
+          ? Colors.greenAccent[700]
+          : null,
+      color: appointmentsRepository.isMultiSelectActive &&
+              appointmentsRepository.multiSelectedDates.contains(day)
+          ? AppColors.white
+          : [6, 7].contains(day.weekday)
+              ? AppColors.error
+              : AppColors.primary,
     );
   }
 }

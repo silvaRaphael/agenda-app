@@ -1,14 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
 import 'package:agenda/components/appointments_list_tile.dart';
 import 'package:agenda/components/my_tab.dart';
+
+import 'package:agenda/repositories/appointments.dart';
 
 import 'package:agenda/utils/week_days.dart';
 import 'package:agenda/utils/constants.dart';
 
 class HomeTab extends StatefulWidget {
-  final Function(Map<String, dynamic> a, DateTime? b) openEditScreen;
+  final Function(Map<String, dynamic>, List, DateTime) openEditScreen;
   final List<dynamic> Function(DateTime day) getAppointmentsForDay;
   final Map<DateTime, List> appointments;
 
@@ -24,15 +28,23 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  DateTime firstDayOfWeek = DateTime(DateTime.now().year, DateTime.now().month,
-      DateTime.now().day - DateTime.now().weekday % 7);
+  late List weekDayAppointments;
 
-  DateTime lastDayOfMonth =
-      DateTime(DateTime.now().year, DateTime.now().month + 1, 0);
+  DateTime firstDayOfWeek = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day - DateTime.now().weekday % 7,
+  );
+
+  DateTime lastDayOfMonth = DateTime(
+    DateTime.now().year,
+    DateTime.now().month + 1,
+    0,
+  );
 
   late int remainingWeeks;
 
-  List<List> monthWeeks = [];
+  List monthWeeks = [];
 
   @override
   void initState() {
@@ -43,7 +55,7 @@ class _HomeTabState extends State<HomeTab> {
             7)
         .ceil();
 
-    monthWeeks = List.generate(remainingWeeks, (index) => [index, index == 0]);
+    monthWeeks = List.generate(remainingWeeks, (index) => 1);
   }
 
   @override
@@ -84,7 +96,7 @@ class _HomeTabState extends State<HomeTab> {
                           bottom: 14,
                         ),
                         child: Text(
-                          'Dia ${week.day} a Dia ${week.add(const Duration(days: 6)).day}',
+                          'Dia ${week.day} a ${week.add(const Duration(days: 6)).day}',
                           style: TextStyle(
                             color: AppColors.primary,
                             fontSize: 16,
@@ -100,8 +112,12 @@ class _HomeTabState extends State<HomeTab> {
                         itemBuilder: (context, index) {
                           DateTime weekDay = week.add(Duration(days: index));
 
-                          List weekDayAppointments =
-                              widget.getAppointmentsForDay(weekDay);
+                          weekDayAppointments = context
+                              .watch<AppointmentsRepository>()
+                              .dayAppointments(weekDay);
+
+                          print(weekDay);
+                          print(weekDayAppointments);
 
                           if (weekDayAppointments.isEmpty) {
                             return Container();
@@ -149,7 +165,10 @@ class _HomeTabState extends State<HomeTab> {
                                         appointment: weekDayAppointments[index],
                                         date: weekDay,
                                         onTap: () => widget.openEditScreen(
-                                            appointmentMap, weekDay),
+                                          appointmentMap,
+                                          weekDayAppointments,
+                                          weekDay,
+                                        ),
                                       );
                                     },
                                   ),

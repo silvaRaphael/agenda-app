@@ -109,24 +109,27 @@ class _MyIconTextButtonState extends State<MyIconTextButton> {
                           size: 28,
                           color: widget.color ?? AppColors.white,
                         )
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              widget.label,
-                              style: TextStyle(
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                widget.icon,
+                                size: 24,
                                 color: widget.color ?? AppColors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
                               ),
-                            ),
-                            const SizedBox(width: 5),
-                            Icon(
-                              widget.icon,
-                              size: 24,
-                              color: widget.color ?? AppColors.white,
-                            ),
-                          ],
+                              const SizedBox(width: 5),
+                              Text(
+                                widget.label,
+                                style: TextStyle(
+                                  color: widget.color ?? AppColors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
         ),
       ),

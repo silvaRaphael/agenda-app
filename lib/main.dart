@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:agenda/screens/inicio.dart';
 
+import 'package:agenda/repositories/appointments.dart';
 import 'package:agenda/utils/constants.dart';
 
 void main() async {
@@ -27,7 +29,12 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('appointments');
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AppointmentsRepository(null),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

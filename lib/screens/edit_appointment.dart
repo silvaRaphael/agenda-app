@@ -1,5 +1,8 @@
+import 'package:agenda/repositories/appointments.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+
+import 'package:provider/provider.dart';
 
 import 'package:agenda/components/app_bar.dart';
 import 'package:agenda/components/markers_list.dart';
@@ -8,17 +11,16 @@ import 'package:agenda/components/inline_radio.dart';
 import 'package:agenda/components/outline_input.dart';
 import 'package:agenda/components/icon_text_button.dart';
 
-import 'package:agenda/utils/api.dart';
 import 'package:agenda/utils/appointments.dart';
 import 'package:agenda/utils/constants.dart';
 
 class EditAppointmentScreen extends StatefulWidget {
-  final DateTime day;
+  final DateTime date;
   final Map<String, dynamic> appointment;
   final List<dynamic>? usedMarkers;
 
   const EditAppointmentScreen({
-    required this.day,
+    required this.date,
     required this.appointment,
     this.usedMarkers,
     super.key,
@@ -29,6 +31,8 @@ class EditAppointmentScreen extends StatefulWidget {
 }
 
 class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
+  late AppointmentsRepository appointmentsRepository;
+
   late MyTextEditingController _title;
   final MyTextEditingController _description = MyTextEditingController();
   int _group = 0;
@@ -61,13 +65,17 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
   void _editAppointment() {
     if (!_title.validate()) return;
 
-    AppointmentsRepository(widget.day).update({
-      'id': widget.appointment['id'],
-      'title': _title.text.trim(),
-      'description': _description.text,
-      'group': _group,
-      'marker': _marker,
-    }, id: widget.appointment['id']);
+    appointmentsRepository.update(
+      {
+        'id': widget.appointment['id'],
+        'title': _title.text.trim(),
+        'description': _description.text,
+        'group': _group,
+        'marker': _marker,
+      },
+      date: widget.date,
+      id: widget.appointment['id'],
+    );
 
     Navigator.of(context).pop();
   }
@@ -91,7 +99,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
             ),
             const SizedBox(height: 18),
             Text(
-              'Tem certeza que quer excluir este agendamento?',
+              'Tem certeza que quer excluir está agenda?',
               style: TextStyle(
                 color: AppColors.primary,
               ),
@@ -102,7 +110,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 MyIconTextButton(
-                  label: 'Excluir Agendamento',
+                  label: 'Excluir Agenda',
                   icon: CupertinoIcons.trash,
                   backgroundColor: AppColors.error,
                   onPressed: _deleteAppointment,
@@ -117,7 +125,10 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
   }
 
   void _deleteAppointment() {
-    AppointmentsRepository(widget.day).delete(id: widget.appointment['id']);
+    appointmentsRepository.delete(
+      date: widget.date,
+      id: widget.appointment['id'],
+    );
 
     Navigator.of(context)
       ..pop()
@@ -135,6 +146,8 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    appointmentsRepository = context.read<AppointmentsRepository>();
+
     return Scaffold(
       appBar: const GoBackAppBar(),
       body: SafeArea(
@@ -155,7 +168,7 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${months[widget.day.month - 1]}\n${widget.day.day.toString().padLeft(2, '0')}/${widget.day.month.toString().padLeft(2, '0')}/${widget.day.year}',
+                        '${months[widget.date.month - 1]}\n${widget.date.day.toString().padLeft(2, '0')}/${widget.date.month.toString().padLeft(2, '0')}/${widget.date.year}',
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 32,
@@ -239,11 +252,11 @@ class _EditAppointmentScreenState extends State<EditAppointmentScreen> {
                           ),
                           const SizedBox(width: 18),
                           MyIconTextButton(
-                            label: 'Editar Agendamento',
-                            icon: Icons.edit,
+                            label: 'Editar Agenda',
+                            icon: Icons.edit_note_rounded,
                             onPressed: _editAppointment,
-                            color: Colors.black.withOpacity(.85),
-                            backgroundColor: AppColors.grey,
+                            color: AppColors.white,
+                            backgroundColor: Colors.black54,
                             borderRadius: BorderRadius.circular(100),
                           ),
                         ],

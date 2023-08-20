@@ -11,7 +11,7 @@ import 'package:agenda/components/my_tab.dart';
 
 import 'package:agenda/utils/constants.dart';
 import 'package:agenda/utils/models.dart';
-import 'package:agenda/utils/api.dart';
+import 'package:agenda/repositories/appointments.dart';
 
 class InicioScreen extends StatefulWidget {
   const InicioScreen({super.key});
@@ -42,7 +42,7 @@ class _InicioScreenState extends State<InicioScreen>
     ),
   ];
 
-  DateTime _focusedDay = DateTime.now();
+  final DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<DateTime> _multiSelectedDays = [];
   bool multiSelectDays = false;
@@ -58,7 +58,7 @@ class _InicioScreenState extends State<InicioScreen>
   }
 
   void _getAppointments() {
-    Map<DateTime, List> appointments = AppointmentsRepository(null).getAll();
+    Map<DateTime, List> appointments = AppointmentsRepository(null).list;
 
     setState(() {
       _appointments = appointments;
@@ -108,28 +108,20 @@ class _InicioScreenState extends State<InicioScreen>
     });
   }
 
-  void _openEditScreen(Map<String, dynamic> appointment, DateTime? day) {
+  void _openEditScreen(
+      Map<String, dynamic> appointment, List dayAppointments, DateTime date) {
     Navigator.push(
       context,
       CupertinoPageRoute(
         builder: (context) => EditAppointmentScreen(
-          day: day != null ? DateTime.parse(day.toString()) : _selectedDay!,
-          usedMarkers: _dayAppointments
+          date: DateTime.parse(date.toString()),
+          usedMarkers: dayAppointments
               .map((appointment) => appointment['marker'])
               .toList(),
           appointment: appointment,
         ),
       ),
-    ).then((value) {
-      setState(() {
-        _selectedDay = null;
-        if (multiSelectDays) {
-          _multiSelectedDays.clear();
-          multiSelectDays = false;
-        }
-      });
-      initAppointments(null);
-    });
+    );
   }
 
   @override
@@ -220,31 +212,7 @@ class _InicioScreenState extends State<InicioScreen>
                 getAppointmentsForDay: _getAppointmentsForDay,
                 appointments: _appointments,
               ),
-              CalendarTab(
-                openEditScreen: _openEditScreen,
-                getAppointmentsForDay: _getAppointmentsForDay,
-                selectedDay: _selectedDay,
-                setSelectedDay: (p0) {
-                  setState(() {
-                    _selectedDay = p0;
-                  });
-                },
-                multiSelectDays: (p0) {
-                  setState(() {
-                    multiSelectDays = p0;
-                  });
-                },
-                multiSelectedDays: (p0) {
-                  setState(() {
-                    _multiSelectedDays = p0;
-                  });
-                },
-                setDayAppointments: (p0) {
-                  setState(() {
-                    _dayAppointments = p0;
-                  });
-                },
-              ),
+              CalendarTab(openEditScreen: _openEditScreen),
               const MyTab(
                 children: [
                   Center(
