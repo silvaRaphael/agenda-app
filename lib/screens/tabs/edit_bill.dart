@@ -84,7 +84,8 @@ class _EditBillScreenState extends State<EditBillScreen> {
       {
         'id': widget.bill['id'],
         'title': _title.text.trim(),
-        'value': double.parse(_value.text.trim().replaceAll(',', '.')),
+        'value': double.parse(
+            _value.text.trim().replaceAll('.', '').replaceAll(',', '.')),
         'description': _description.text,
         'paymentType': _paymentType,
         'marker': _marker,
