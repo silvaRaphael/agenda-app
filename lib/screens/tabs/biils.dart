@@ -1,6 +1,8 @@
 import 'package:agenda/repositories/bills.dart';
+import 'package:agenda/utils/bills.dart';
 import 'package:agenda/utils/week_days.dart';
 import 'package:agenda/widgets/bills_list_tile.dart';
+import 'package:agenda/widgets/bills_payment_filter_list.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -11,7 +13,7 @@ import 'package:agenda/widgets/my_tab.dart';
 import 'package:agenda/utils/constants.dart';
 
 class BillsTab extends StatefulWidget {
-  final Function(Map<String, dynamic>, List, DateTime) openEditScreen;
+  final Function(Map<String, dynamic>, int) openEditScreen;
 
   const BillsTab({
     required this.openEditScreen,
@@ -29,15 +31,15 @@ class _BillsTabState extends State<BillsTab> {
 
   double _calculateMonthDayListOffSet(int? day) {
     day ??= DateTime.now().day;
-    int dayOffset = day * (40 + 10) - 10;
-    int lastDayOffset = 31 * (40 + 10) - 10;
+    int dayOffset = day * (35 + 10) - 10;
+    int lastDayOffset = 31 * (35 + 10) - 10;
     double screenCenter = MediaQuery.of(context).size.width / 2;
 
     if (dayOffset < screenCenter) {
       return 0;
     }
     if (dayOffset > lastDayOffset - screenCenter) {
-      return (lastDayOffset - screenCenter * 2 + 40).toDouble();
+      return (lastDayOffset - screenCenter * 2 + 35).toDouble();
     }
     return dayOffset - screenCenter;
   }
@@ -86,7 +88,7 @@ class _BillsTabState extends State<BillsTab> {
                 '${NumberFormat.currency(
                   locale: 'pt_BR',
                   symbol: 'R\$',
-                ).format(3142)} em contas no mês',
+                ).format(billsRepository.totalValue)} em contas no ${billsRepository.paymentTypeFilter == null ? 'mês' : paymentTypes[billsRepository.paymentTypeFilter!].toLowerCase()}',
                 style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 32,
@@ -97,7 +99,7 @@ class _BillsTabState extends State<BillsTab> {
             ),
             const SizedBox(height: 18),
             SizedBox(
-              height: 40,
+              height: 35,
               child: ListView.separated(
                 physics: const BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
@@ -124,7 +126,11 @@ class _BillsTabState extends State<BillsTab> {
                               : isToday
                                   ? Colors.grey[500]
                                   : Colors.transparent,
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(
+                            width: 1,
+                            color: AppColors.dark,
+                          ),
                         ),
                         child: Center(
                           child: Text(
@@ -133,7 +139,7 @@ class _BillsTabState extends State<BillsTab> {
                               color: isToday || isSelected
                                   ? AppColors.white
                                   : AppColors.primary.withOpacity(.75),
-                              fontSize: 18,
+                              fontSize: 14,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
@@ -144,72 +150,97 @@ class _BillsTabState extends State<BillsTab> {
                 },
               ),
             ),
+            const SizedBox(height: 18),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: BillsPaymentFilterList(
+                paymentType: billsRepository.paymentTypeFilter,
+                paymentTypes: paymentTypes,
+                onTap: billsRepository.setPaymentTypeFilter,
+              ),
+            ),
             const SizedBox(height: 26),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: 30,
-                itemBuilder: (context, index) {
-                  int day = index + 1;
-
-                  if (billsRepository.list[day] == null) {
-                    return Container();
-                  }
-
-                  DateTime now = DateTime.now();
-
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 30,
-                        child: Text(
-                          '$day\n${weekDaysMondayFirst[DateTime(now.year, now.month, day).weekday - 1].substring(0, 3)}',
-                          style: TextStyle(
-                            color: AppColors.primary.withOpacity(.5),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                          textAlign: TextAlign.end,
-                        ),
+              child: billsRepository.list.isEmpty
+                  ? Text(
+                      billsRepository.paymentTypeFilter == null
+                          ? 'Você ainda não tem nenhuma conta salva'
+                          : 'Você não tem nenhuma conta deste tipo',
+                      style: const TextStyle(
+                        fontSize: 18,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.only(
-                            left: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              left: BorderSide(
-                                color: AppColors.dark,
-                                width: 1,
+                      textAlign: TextAlign.center,
+                    )
+                  : ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: 30,
+                      itemBuilder: (context, index) {
+                        int day = index + 1;
+
+                        if (billsRepository.list[day] == null ||
+                            (billsRepository.list[day] != null &&
+                                billsRepository.list[day]!.isEmpty)) {
+                          return Container();
+                        }
+
+                        DateTime now = DateTime.now();
+
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 30,
+                              child: Text(
+                                '$day\n${weekDaysMondayFirst[DateTime(now.year, now.month, day).weekday - 1].substring(0, 3)}',
+                                style: TextStyle(
+                                  color: AppColors.primary.withOpacity(.5),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                textAlign: TextAlign.end,
                               ),
                             ),
-                          ),
-                          child: ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: billsRepository.list[day]?.length,
-                            itemBuilder: (context, index) {
-                              if (billsRepository.list[day] == null) {
-                                return Container();
-                              }
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.only(
+                                  left: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    left: BorderSide(
+                                      color: AppColors.dark,
+                                      width: 1,
+                                    ),
+                                  ),
+                                ),
+                                child: ListView.builder(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemCount: billsRepository.list[day]?.length,
+                                  itemBuilder: (context, index) {
+                                    if (billsRepository.list[day] == null) {
+                                      return Container();
+                                    }
 
-                              return BillsListTile(
-                                bill: billsRepository.list[day]?[index],
-                                day: day,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                                    return BillsListTile(
+                                      bill: billsRepository.list[day]?[index],
+                                      day: day,
+                                      onTap: () => widget.openEditScreen(
+                                        billsRepository.list[day]?[index],
+                                        day,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
             ),
           ],
         ),
