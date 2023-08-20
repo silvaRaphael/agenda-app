@@ -1,5 +1,6 @@
 import 'package:agenda/screens/add_bill.dart';
 import 'package:agenda/screens/tabs/edit_bill.dart';
+import 'package:agenda/widgets/bills_list_tile.dart';
 import 'package:agenda/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,15 +20,14 @@ import 'package:agenda/repositories/bills.dart';
 import 'package:agenda/utils/constants.dart';
 import 'package:agenda/utils/models.dart';
 
-class InicioScreen extends StatefulWidget {
-  const InicioScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<InicioScreen> createState() => _InicioScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _InicioScreenState extends State<InicioScreen>
-    with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AppointmentsRepository appointmentsRepository;
   late BillsRepository billsRepository;
 
@@ -116,6 +116,19 @@ class _InicioScreenState extends State<InicioScreen>
     appointmentsRepository = context.watch<AppointmentsRepository>();
     billsRepository = context.watch<BillsRepository>();
 
+    DateTime now = DateTime.now();
+
+    List<List<dynamic>> notificationBillsList = [
+      ['Hoje', billsRepository.dayBills(now.day)],
+      [
+        'Em 1 dia',
+        billsRepository.dayBills(now.add(const Duration(days: 1)).day)
+      ],
+      [
+        'Em 2 dias',
+        billsRepository.dayBills(now.add(const Duration(days: 2)).day)
+      ]
+    ];
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle(
@@ -147,27 +160,99 @@ class _InicioScreenState extends State<InicioScreen>
               : Container(),
           Padding(
             padding: const EdgeInsets.only(right: 20),
-            child: GestureDetector(
-              onTap: () {},
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 1,
-                      color: Colors.black12,
+            child: Builder(builder: (context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 1,
+                        color: Colors.black12,
+                      ),
+                      borderRadius: BorderRadius.circular(100),
                     ),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: const Icon(
-                    Icons.notifications_none_rounded,
-                    size: 18,
+                    child: const Icon(
+                      Icons.notifications_none_rounded,
+                      size: 18,
+                    ),
                   ),
                 ),
+              );
+            }),
+          ),
+        ],
+      ),
+      endDrawer: Drawer(
+        width: MediaQuery.of(context).size.width * .7,
+        backgroundColor: AppColors.white,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 18),
+                  Text(
+                    'Você tem contas à vencer',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                  const SizedBox(height: 18),
+                  ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: notificationBillsList.length,
+                    itemBuilder: (context, index) {
+                      if (notificationBillsList[index][1]?.length == 0) {
+                        return Container();
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            notificationBillsList[index][0].toString(),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.start,
+                          ),
+                          const SizedBox(height: 8),
+                          ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: notificationBillsList[index][1].length,
+                            itemBuilder: (context, index) {
+                              if (notificationBillsList[index][1]?.length ==
+                                  0) {
+                                return Container();
+                              }
+                              return BillsListTile(
+                                bill: notificationBillsList[index][1][index],
+                                day: DateTime.now().day,
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
       body: Stack(
         children: [

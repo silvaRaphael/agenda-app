@@ -56,14 +56,12 @@ class BillsRepository extends ChangeNotifier {
     return collectionMap;
   }
 
-  List dayBills(DateTime? date) {
-    if (date == null) return [];
+  List dayBills(int? day) {
+    if (day == null) return [];
 
-    final formattedDate = DateTime(date.year, date.month, date.day);
+    final billsForDay = list[day];
 
-    final billsForDate = list[formattedDate];
-
-    return billsForDate ?? [];
+    return billsForDay ?? [];
   }
 
   void create(dynamic body, {required int day}) {

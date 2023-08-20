@@ -54,6 +54,10 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.white,
         primaryColor: AppColors.primary,
+        drawerTheme: DrawerThemeData(
+          elevation: 0,
+          scrimColor: Colors.black.withOpacity(.05),
+        ),
         textTheme: GoogleFonts.poppinsTextTheme(textTheme).copyWith(
           bodyMedium: GoogleFonts.poppins(
             textStyle: textTheme.bodyMedium,
@@ -61,7 +65,7 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      home: const InicioScreen(),
+      home: const HomeScreen(),
     );
   }
 }
