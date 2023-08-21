@@ -7,9 +7,10 @@ class BillsRepository extends ChangeNotifier {
   final Box box = Hive.box('bills');
 
   int? _paymentTypeFilter;
-  int? _selectedDay = DateTime.now().day;
+  int? _selectedDay;
 
   Map<int, List> get list => getAll();
+  Map<int, List> get notificationList => getAll(filters: false);
   double get totalValue {
     double total = 0;
     list.forEach((key, value) {
@@ -35,7 +36,7 @@ class BillsRepository extends ChangeNotifier {
     notifyListeners();
   }
 
-  Map<int, List> getAll() {
+  Map<int, List> getAll({bool filters = true}) {
     Map<dynamic, dynamic> collection = box.toMap();
 
     Map<int, List> collectionMap = Map.fromEntries(
@@ -43,11 +44,18 @@ class BillsRepository extends ChangeNotifier {
         List<dynamic> billsList =
             entry.value.map((item) => jsonDecode(item)).toList();
 
-        billsList = billsList
-            .where((item) =>
-                _paymentTypeFilter == null ||
-                item['paymentType'] == _paymentTypeFilter)
-            .toList();
+        if (filters) {
+          if (_paymentTypeFilter != null) {
+            billsList = billsList
+                .where((item) => item['paymentType'] == _paymentTypeFilter)
+                .toList();
+          }
+
+          if (_selectedDay != null) {
+            billsList =
+                billsList.where((item) => entry.key == _selectedDay).toList();
+          }
+        }
 
         return MapEntry(entry.key, billsList);
       }),
@@ -59,7 +67,7 @@ class BillsRepository extends ChangeNotifier {
   List dayBills(int? day) {
     if (day == null) return [];
 
-    final billsForDay = list[day];
+    final billsForDay = notificationList[day];
 
     return billsForDay ?? [];
   }

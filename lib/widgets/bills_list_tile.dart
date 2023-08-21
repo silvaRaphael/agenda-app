@@ -50,15 +50,17 @@ class BillsListTile extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          bill['title'],
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            overflow: TextOverflow.ellipsis,
+                        Expanded(
+                          child: Text(
+                            bill['title'],
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            softWrap: true,
                           ),
-                          softWrap: true,
                         ),
                         const SizedBox(width: 10),
                         Text(

@@ -54,10 +54,11 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.white,
         primaryColor: AppColors.primary,
-        drawerTheme: DrawerThemeData(
-          elevation: 0,
-          scrimColor: Colors.black.withOpacity(.05),
+        drawerTheme: const DrawerThemeData(
+          elevation: 2,
+          scrimColor: Colors.transparent,
         ),
+        dialogBackgroundColor: Colors.transparent,
         textTheme: GoogleFonts.poppinsTextTheme(textTheme).copyWith(
           bodyMedium: GoogleFonts.poppins(
             textStyle: textTheme.bodyMedium,

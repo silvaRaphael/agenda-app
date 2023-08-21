@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late BillsRepository billsRepository;
 
   int _tabIndex = 0;
+  DateTime now = DateTime.now();
 
   final List<ModelNavBarItem> _bottomNavBarItemsList = const [
     ModelNavBarItem(
@@ -116,8 +117,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     appointmentsRepository = context.watch<AppointmentsRepository>();
     billsRepository = context.watch<BillsRepository>();
 
-    DateTime now = DateTime.now();
-
     List<List<dynamic>> notificationBillsList = [
       ['Hoje', billsRepository.dayBills(now.day)],
       [
@@ -129,6 +128,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         billsRepository.dayBills(now.add(const Duration(days: 2)).day)
       ]
     ];
+
+    int notificationCount = 0;
+    for (var element in notificationBillsList) {
+      element[1].forEach((item) {
+        notificationCount += 1;
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -159,31 +165,57 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           _tabIndex == 2 && billsRepository.selectedDay != null
               ? appBarAddButton(_openAddBillScreen)
               : Container(),
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Builder(builder: (context) {
-              return GestureDetector(
-                onTap: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        width: 1,
-                        color: Colors.black12,
-                      ),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: const Icon(
-                      Icons.notifications_none_rounded,
-                      size: 18,
+          Stack(
+            children: [
+              Positioned(
+                top: 10,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.dark.withOpacity(1),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: Text(
+                    notificationCount.toString(),
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-              );
-            }),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Builder(builder: (context) {
+                  return GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).openEndDrawer();
+                    },
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 1,
+                            color: Colors.black12,
+                          ),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: const Icon(
+                          Icons.notifications_none_rounded,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         ],
       ),
@@ -194,63 +226,83 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 18),
-                  Text(
-                    'Você tem contas à vencer',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
+              padding: const EdgeInsets.all(20),
+              child: notificationCount == 0
+                  ? Text(
+                      'Nenhuma notificação ainda',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.start,
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Você tem contas à vencer',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.start,
+                        ),
+                        const SizedBox(height: 12),
+                        ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: notificationBillsList.length,
+                          itemBuilder: (context, index) {
+                            if (notificationBillsList[index][1]?.length == 0) {
+                              return Container();
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 12),
+                                Text(
+                                  notificationBillsList[index][0].toString(),
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                                const SizedBox(height: 8),
+                                ListView.builder(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemCount:
+                                      notificationBillsList[index][1].length,
+                                  itemBuilder: (context, childIndex) {
+                                    int day = DateTime.now()
+                                        .add(Duration(days: index))
+                                        .day;
+                                    return BillsListTile(
+                                      bill: notificationBillsList[index][1]
+                                          ?[childIndex],
+                                      day: day,
+                                      onTap: () {
+                                        billsRepository.setSelectedDay(day);
+                                        Scaffold.of(context).closeEndDrawer();
+                                        if (_tabIndex != 2) {
+                                          setState(() {
+                                            _tabIndex = 2;
+                                          });
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.start,
-                  ),
-                  const SizedBox(height: 18),
-                  ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: notificationBillsList.length,
-                    itemBuilder: (context, index) {
-                      if (notificationBillsList[index][1]?.length == 0) {
-                        return Container();
-                      }
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            notificationBillsList[index][0].toString(),
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            textAlign: TextAlign.start,
-                          ),
-                          const SizedBox(height: 8),
-                          ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: notificationBillsList[index][1].length,
-                            itemBuilder: (context, index) {
-                              if (notificationBillsList[index][1]?.length ==
-                                  0) {
-                                return Container();
-                              }
-                              return BillsListTile(
-                                bill: notificationBillsList[index][1][index],
-                                day: DateTime.now().day,
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
             ),
           ),
         ),
@@ -264,7 +316,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               BillsTab(openEditScreen: _openEditBillScreen),
             ][_tabIndex],
           ),
-          // bottom navbar
           Positioned(
             left: 10,
             right: 10,
