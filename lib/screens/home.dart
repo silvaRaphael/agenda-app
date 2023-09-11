@@ -167,28 +167,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               : Container(),
           Stack(
             children: [
-              Positioned(
-                top: 10,
-                right: 16,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.dark.withOpacity(1),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Text(
-                    notificationCount.toString(),
-                    style: TextStyle(
-                      color: AppColors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
+              notificationCount == 0
+                  ? Container()
+                  : Positioned(
+                      top: 10,
+                      right: 16,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.dark.withOpacity(1),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Text(
+                          notificationCount.toString(),
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
               Padding(
                 padding: const EdgeInsets.only(right: 20),
                 child: Builder(builder: (context) {
