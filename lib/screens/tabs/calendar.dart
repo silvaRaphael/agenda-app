@@ -165,7 +165,7 @@ class _CalendarTabState extends State<CalendarTab> {
               },
               // weekend days
               dowBuilder: (context, day) => Text(
-                weekDays[day.weekday - 1].substring(0, 3),
+                weekDaysMondayFirst[day.weekday - 1].substring(0, 3),
                 style: TextStyle(
                   color: [6, 7].contains(day.weekday)
                       ? AppColors.error
