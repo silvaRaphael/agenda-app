@@ -88,7 +88,7 @@ class _BillsTabState extends State<BillsTab> {
                 '${NumberFormat.currency(
                   locale: 'pt_BR',
                   symbol: 'R\$',
-                ).format(billsRepository.totalValue)} em contas no ${billsRepository.paymentTypeFilter == null ? 'mês' : paymentTypes[billsRepository.paymentTypeFilter!].toLowerCase()}',
+                ).format(billsRepository.totalValue)} em contas no ${(billsRepository.selectedDay != null ? 'dia' : 'mês')} ${billsRepository.paymentTypeFilter != null ? ('no ' + paymentTypes[billsRepository.paymentTypeFilter!].toLowerCase()) : ''}',
                 style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 32,
