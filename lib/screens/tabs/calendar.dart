@@ -34,8 +34,7 @@ class _CalendarTabState extends State<CalendarTab> {
   Widget build(BuildContext context) {
     appointmentsRepository = context.watch<AppointmentsRepository>();
 
-    dayAppointments = appointmentsRepository
-        .dayAppointments(appointmentsRepository.selectedDate);
+    dayAppointments = appointmentsRepository.dayAppointments(appointmentsRepository.selectedDate);
 
     return MyTab(
       children: [
@@ -81,8 +80,7 @@ class _CalendarTabState extends State<CalendarTab> {
               }
             },
             headerStyle: HeaderStyle(
-              titleTextFormatter: (date, locale) =>
-                  '${months[date.month - 1]} ${date.year}',
+              titleTextFormatter: (date, locale) => '${months[date.month - 1]} ${date.year}',
               titleTextStyle: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w800,
@@ -132,8 +130,7 @@ class _CalendarTabState extends State<CalendarTab> {
                   bottom: 2,
                   child: Row(
                     children: appointments.take(3).map((appointment) {
-                      Map<String, dynamic> appointmentMap =
-                          appointment as Map<String, dynamic>;
+                      Map<String, dynamic> appointmentMap = appointment as Map<String, dynamic>;
                       index++;
 
                       if (appointments.length > 3 && index == 3) {
@@ -152,8 +149,7 @@ class _CalendarTabState extends State<CalendarTab> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: appointmentMap['marker'].runtimeType == int
-                              ? markers[
-                                  appointmentMap['marker']] // Cor do marcador
+                              ? markers[appointmentMap['marker']] // Cor do marcador
                               : AppColors.primary,
                         ),
                         width: 7,
@@ -164,17 +160,17 @@ class _CalendarTabState extends State<CalendarTab> {
                 );
               },
               // weekend days
-              dowBuilder: (context, day) => Text(
-                weekDaysMondayFirst[day.weekday - 1].substring(0, 3),
-                style: TextStyle(
-                  color: [6, 7].contains(day.weekday)
-                      ? AppColors.error
-                      : AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              dowBuilder: (context, day) {
+                return Text(
+                  weekDaysMondayFirst[day.weekday - 1].substring(0, 3),
+                  style: TextStyle(
+                    color: [6, 7].contains(day.weekday) ? AppColors.error : AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  textAlign: TextAlign.center,
+                );
+              },
             ),
           ),
         ),
@@ -197,8 +193,7 @@ class _CalendarTabState extends State<CalendarTab> {
                       shrinkWrap: true,
                       itemCount: dayAppointments.length,
                       itemBuilder: (context, index) {
-                        Map<String, dynamic> appointmentMap =
-                            dayAppointments[index] as Map<String, dynamic>;
+                        Map<String, dynamic> appointmentMap = dayAppointments[index] as Map<String, dynamic>;
                         return AppointmentsListTile(
                           appointment: dayAppointments[index],
                           date: appointmentsRepository.selectedDate!,
@@ -219,8 +214,7 @@ class _CalendarTabState extends State<CalendarTab> {
     );
   }
 
-  MyCalendarDay? dayBuilder(
-      BuildContext context, DateTime day, DateTime focusedDay) {
+  MyCalendarDay? dayBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
     day = DateTime(day.year, day.month, day.day);
     DateTime? selectedDate = appointmentsRepository.selectedDate;
 
@@ -241,8 +235,7 @@ class _CalendarTabState extends State<CalendarTab> {
     }
 
     if (appointmentsRepository.isMultiSelectActive &&
-        appointmentsRepository.multiSelectedDates
-            .contains(DateTime.parse('${day}Z'))) {
+        appointmentsRepository.multiSelectedDates.contains(DateTime.parse('${day}Z'))) {
       return MyCalendarDay(
         day: day,
         backgroundColor: Colors.greenAccent[700],
@@ -261,12 +254,11 @@ class _CalendarTabState extends State<CalendarTab> {
 
     return MyCalendarDay(
       day: day,
-      backgroundColor: appointmentsRepository.isMultiSelectActive &&
-              appointmentsRepository.multiSelectedDates.contains(day)
-          ? Colors.greenAccent[700]
-          : null,
-      color: appointmentsRepository.isMultiSelectActive &&
-              appointmentsRepository.multiSelectedDates.contains(day)
+      backgroundColor:
+          appointmentsRepository.isMultiSelectActive && appointmentsRepository.multiSelectedDates.contains(day)
+              ? Colors.greenAccent[700]
+              : null,
+      color: appointmentsRepository.isMultiSelectActive && appointmentsRepository.multiSelectedDates.contains(day)
           ? AppColors.white
           : [6, 7].contains(day.weekday)
               ? AppColors.error
